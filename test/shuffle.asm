@@ -1,0 +1,13 @@
+	.ORIG x3000
+A 	.FILL x3050
+	LEA R1, A
+	LDW R1, R1, #0
+B	LDW R2, R1, #0
+	RSHFL R3, R2, #8
+	STB R3, R1, #0
+	STB R2, R1, #1
+	ADD R1, R1, #2
+	ADD R0, R0, #-1
+	BRP B
+	HALT
+	.END
