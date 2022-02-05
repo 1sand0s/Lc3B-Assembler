@@ -186,7 +186,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@
+LIBS="-lm"
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
@@ -337,7 +337,7 @@ clean-binPROGRAMS:
 
 a.out$(EXEEXT): $(a_out_OBJECTS) $(a_out_DEPENDENCIES) $(EXTRA_a_out_DEPENDENCIES) 
 	@rm -f a.out$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(a_out_OBJECTS) $(a_out_LDADD) $(LIBS) -lm
+	$(AM_V_CCLD)$(LINK) $(a_out_OBJECTS) $(a_out_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
