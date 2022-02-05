@@ -337,7 +337,7 @@ clean-binPROGRAMS:
 
 a.out$(EXEEXT): $(a_out_OBJECTS) $(a_out_DEPENDENCIES) $(EXTRA_a_out_DEPENDENCIES) 
 	@rm -f a.out$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(a_out_OBJECTS) $(a_out_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(a_out_OBJECTS) $(a_out_LDADD) $(LIBS) -lm
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
