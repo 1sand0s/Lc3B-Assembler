@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <limits.h>
+#include "Lc3b-Assembler.h"
 
 //#define Debug_Print
 #define Debug_Print_InstructionTable
@@ -72,59 +73,7 @@ char * inval[43] = {
     "R7"
 };
 
-enum FSM {
-    START,
-    PSTART,
-    PEND,
-    STOP
-};
 
-enum pFSM {
-    LABEL,
-    ORIG,
-    FILL,
-    END,
-    ADD,
-    AND,
-    BR,
-    BRN,
-    BRZ,
-    BRP,
-    BRNZ,
-    BRNP,
-    BRZP,
-    BRNZP,
-    JMP,
-    JSR,
-    JSRR,
-    LDB,
-    LDW,
-    LEA,
-    NOP,
-    NOT,
-    RET,
-    LSHF,
-    RSHFL,
-    RSHFA,
-    RTI,
-    STB,
-    STW,
-    TRAP,
-    XOR,
-    HALT,
-    INVALID,
-    REG,
-    IMM,
-    IGN
-};
-
-enum errorCode {
-    OK_VALID,
-    UNDEFINED_LABEL,
-    INVALID_OPCODE,
-    INVALID_CONSTANT,
-    OTHER_ERROR
-};
 
 enum pFSM pTransitions[68][5] = {   {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
                                     {FILL, IMM, IGN, IGN, IGN}      ,       {LABEL, FILL, IMM, IGN, IGN},
@@ -203,102 +152,15 @@ enum pFSM pStates[38] = {
     IGN
 };
 
-typedef struct symbol {
-    char * symbolName;
-    int addr;
-}
-symbol;
-
-typedef struct instruction {
-    char * label;
-    char * directive;
-    char * opcode;
-    char ** operands;
-    char * encoding;
-    int addr;
-    int opCount;
-}
-instruction;
-
-
-
-/********************************Lexing Methods******************************************/
-enum errorCode assemble(FILE *, FILE* );
-void lexer(char * , char ** * , int * );
-enum errorCode createSymbolTable(FILE * , enum FSM, symbol ** , int * , instruction ** , int * );
-void insertSymbol(symbol ** , int * , char * , int, char * );
-void insertInstruction(instruction ** , int * , char ** * , enum pFSM * , int, int, char * );
-/****************************************************************************************/
-
-
-
-/********************************Data Conversion Methods*********************************/
-int hex2dec(char * );
-char * dec2hex(int);
-char * dec2bin(int);
-char * bin2hex(char * );
-char * int2str(int);
-bool isValidHex(char * );
-bool isValidDec(char * );
-char * dec2dec(int);
-int dec2dec2(char * );
-bool checkValidRange(int, int);
-/***************************************************************************************/
-
-
-
-/******************************Cleanup Methods******************************************/
-void freeLexemes(char ** * , int * );
-void freeSymbolTable(symbol ** , int * );
-void freeInstructionTable(instruction ** , int * );
-/***************************************************************************************/
-
-
-
-/******************************Miscellaneous Methods************************************/
-void printWithIndent(char * , int);
-void prepend(char ** , char * );
-int getAddrofLabel(symbol * , int, char * );
-void toUpperCase(char * );
-/***************************************************************************************/
-
-
-
-/***************************************Encoder Methods*********************************/
-enum errorCode encodeADD(instruction * , symbol * , int);
-enum errorCode encodeAND(instruction * , symbol * , int);
-enum errorCode encodeXOR(instruction * , symbol * , int);
-enum errorCode encodeORIG(instruction * , symbol * , int);
-enum errorCode encodeJMP(instruction * , symbol * , int);
-enum errorCode encodeRET(instruction * , symbol * , int);
-enum errorCode encodeJSRR(instruction * , symbol * , int);
-enum errorCode encodeJSR(instruction * , symbol * , int);
-enum errorCode encodeBR(instruction * , symbol * , int);
-enum errorCode encodeBRN(instruction * , symbol * , int);
-enum errorCode encodeBRZ(instruction * , symbol * , int);
-enum errorCode encodeBRP(instruction * , symbol * , int);
-enum errorCode encodeBRNZ(instruction * , symbol * , int);
-enum errorCode encodeBRNP(instruction * , symbol * , int);
-enum errorCode encodeBRZP(instruction * , symbol * , int);
-enum errorCode encodeBRNZP(instruction * , symbol * , int);
-enum errorCode encodeLDB(instruction * , symbol * , int);
-enum errorCode encodeLDW(instruction * , symbol * , int);
-enum errorCode encodeLEA(instruction * , symbol * , int);
-enum errorCode encodeSTB(instruction * , symbol * , int);
-enum errorCode encodeSTW(instruction * , symbol * , int);
-enum errorCode encodeLSHF(instruction * , symbol * , int);
-enum errorCode encodeRSHFL(instruction * , symbol * , int);
-enum errorCode encodeRSHFA(instruction * , symbol * , int);
-enum errorCode encodeRTI(instruction * , symbol * , int);
-enum errorCode encodeFILL(instruction * , symbol * , int);
-enum errorCode encodeEND(instruction * , symbol * , int);
-enum errorCode encodeNOP(instruction * , symbol * , int);
-enum errorCode encodeTRAP(instruction * , symbol * , int);
-enum errorCode encodeHALT(instruction * , symbol * , int);
-enum errorCode encodeNOT(instruction * , symbol * , int);
-/***************************************************************************************/
-
-
+/** +
+ * @fn enum errorCode (*[])(instruction*, symbol*, int)
+ * @brief Function pointers to encode instructions
+ *
+ * @param instruction*   Instruction to encode
+ * @param symbol*        Symbol if any to replace with address
+ * @param int
+ * @return errorCode     Any errors during encoding process
+ */
 enum errorCode( * encoder[31])(instruction * , symbol * , int) = {
     encodeORIG,
     encodeFILL,
@@ -333,29 +195,9 @@ enum errorCode( * encoder[31])(instruction * , symbol * , int) = {
     encodeBRNZP
 };
 
-
-/***************************************Lexeme Integrity Checker*********************************/
-enum pFSM checkLabel(char * );
-enum pFSM checkpOP(char * );
-enum pFSM checkInst(char * );
-enum pFSM checkRegister(char * );
-enum pFSM checkImmidiate(char ** );
-enum errorCode integrityCheck(char ** * , int * , enum pFSM ** );
-/************************************************************************************************/
-
-
-
-/***************************************Find Lexemes in StateTransitionTable*********************/
-int firstInstanceofLabel(enum pFSM * , int);
-int firstInstanceofDirective(enum pFSM * , int);
-int firstInstanceofOpcode(enum pFSM * , int);
-int firstInstanceofOperands(enum pFSM * , int);
-/************************************************************************************************/
-
-
 /** +
  * @fn int main(int, char**)
- * @brief
+ * @brief main method
  *
  * @param argc
  * @param argv
@@ -391,11 +233,11 @@ int main(int argc, char ** argv) {
 
 /** +
  * @fn enum errorCode assemble(FILE*, FILE*)
- * @brief
+ * @brief Start of assembly process
  *
- * @param in
- * @param out
- * @return errorCode
+ * @param in            Input FILE* containing assembly code <*.asm>
+ * @param out           Output FILE* containing hex code <*.hex>
+ * @return errorCode    Any errors during the assembly process
  */
 enum errorCode assemble(FILE * in, FILE * out ) {
     symbol * symbolTable = malloc(sizeof(struct symbol));
@@ -459,7 +301,6 @@ enum errorCode assemble(FILE * in, FILE * out ) {
         #endif
 
         for (int j = 0; j < tableCount2; j++) {
-
             for (int i = 4; i < 35; i++) {
                 if (instructionTable[j].directive != NULL) {
                     if (strncmp(instructionTable[j].directive, inval[i], strlen(inval[i])) == 0 &&
@@ -476,28 +317,27 @@ enum errorCode assemble(FILE * in, FILE * out ) {
             }
 
         #ifdef Debug_Print_InstructionTable
-                printf("%d\t", errorp);
+            printf("%d\t", errorp);
         #endif
-
             if (errorp == OK_VALID) {
                 char * enc = NULL;
                 if (instructionTable[j].encoding != NULL) {
                     enc = bin2hex((instructionTable[j].encoding));
                     prepend( & enc, "0x");
-            fprintf(out, "%s\n", enc);
+                    fprintf(out, "%s\n", enc);
                 }
 
         #ifdef Debug_Print_InstructionTable
             printf("%s", enc);
-                    printf("\n");
+            printf("\n");
         #endif
-                free(enc);
-            } else
+            free(enc);
+            }
+            else
                 break;
 
         }
     }
-
 
     freeSymbolTable( & symbolTable, & tableCount);
     freeInstructionTable( & instructionTable, & tableCount2);
@@ -505,10 +345,23 @@ enum errorCode assemble(FILE * in, FILE * out ) {
     return errorp;
 }
 
+/** +
+ * @fn void printWithIndent(char*, int)
+ * @brief Print with appropriate indentation
+ *
+ * @param text   char* to print
+ * @param indent Amount of indentation
+ */
 void printWithIndent(char * text, int indent) {
     printf("%*s%s", indent, "", text);
 }
 
+/** +
+ * @fn void toUpperCase(char*)
+ * @brief Standardize output to stdout by using only uppercase
+ *
+ * @param str char* to convert to uppercase
+ */
 void toUpperCase(char * str) {
     for (int i = 0; i < strlen(str); i++) {
         if (isalpha(str[i]) != 0)
@@ -516,6 +369,18 @@ void toUpperCase(char * str) {
     }
 }
 
+/** +
+ * @fn enum errorCode createSymbolTable(FILE*, enum FSM, symbol**, int*, instruction**, int*)
+ * @brief Creates a table of all symbols encountered during the first pass of the assembly code
+ *
+ * @param in                FILE* the assembly code file <*.asm>
+ * @param state             State of the assembly process
+ * @param symbolTable       Struct to hold the symbol table
+ * @param tableCount        Number of elements/symbols in symbol table
+ * @param instructionTable  Struct to hold instructions in the assembly code
+ * @param tableCount2       Number of elements/instructions in instruction table
+ * @return
+ */
 enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTable, int * tableCount, instruction ** instructionTable, int * tableCount2) {
     char * line = NULL;
     size_t len = 0;
@@ -610,13 +475,13 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
 
 /** +
  * @fn void insertSymbol(symbol**, int*, char*, int, char*)
- * @brief
+ * @brief Inserts a symbol into the symbol table
  *
- * @param symbolTable
- * @param tableCount
- * @param label
- * @param line
- * @param startAddr
+ * @param symbolTable   The symbol table
+ * @param tableCount    Number of elements/symbols in the symbol table
+ * @param label         The symbol name
+ * @param line          The line in assembly code where the symbol was defined
+ * @param startAddr     Starting Address of the assemby code (defined using ORIG)
  * @return void
  */
 void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int line, char * startAddr) {
@@ -633,14 +498,14 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
         if (j == * tableCount) {
             * symbolTable = realloc( * symbolTable, (j + 1) * sizeof(struct symbol));
             ( * symbolTable)[j].symbolName = malloc(strlen(label) + 1);
-            strncpy(( * symbolTable)[j].symbolName, label, strlen(label) + 1);
+            strncpy(( * symbolTable)[j].symbolName, label, (size_t)(strlen(label) + 1));
             ( * symbolTable)[j].addr = dec2dec2(startAddr) + (line - 1) * 2;
             * tableCount = ( * tableCount) + 1;
         }
 
     } else {
         ( * symbolTable)[0].symbolName = malloc(strlen(label) + 1);
-        strncpy(( * symbolTable)[0].symbolName, label, strlen(label) + 1);
+        strncpy(( * symbolTable)[0].symbolName, label, (size_t)(strlen(label) + 1));
         ( * symbolTable)[0].addr = dec2dec2(startAddr) + (line - 1) * 2;
         * tableCount = ( * tableCount) + 1;
     }
@@ -648,15 +513,15 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
 
 /**+
  * @fn void insertInstruction(instruction**, int*, char***, enum pFSM*, int, int, char*)
- * @brief
+ * @brief Inserts an instrcution into the instruction table
  *
- * @param instructionTable
- * @param tableCount
+ * @param instructionTable  The instruction table
+ * @param tableCount        Number of elements/instructions in the instruction table
  * @param tokens
  * @param stateTransition
  * @param step
- * @param line
- * @param startAddr
+ * @param line              Line where the instruction was encountered
+ * @param startAddr         Starting address of the code (defined using ORIG)
  * @return void
  */
 void insertInstruction(instruction ** instructionTable, int * tableCount, char ** * tokens, enum pFSM * stateTransition, int step, int line, char * startAddr) {
@@ -677,17 +542,17 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
 
         if (labelIndex == 0) {
             ( * instructionTable)[ * tableCount].label = malloc(strlen(( * tokens)[0]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], strlen(( * tokens)[0]) + 1);
+            strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (size_t)(strlen(( * tokens)[0]) + 1));
         }
 
         if (directiveIndex < step) {
             ( * instructionTable)[ * tableCount].directive = malloc(strlen(( * tokens)[directiveIndex]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], strlen(( * tokens)[directiveIndex]) + 1);
+            strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (size_t)(strlen(( * tokens)[directiveIndex]) + 1));
         }
 
         if (opcodeIndex < step) {
             ( * instructionTable)[ * tableCount].opcode = malloc(strlen(( * tokens)[opcodeIndex]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], strlen(( * tokens)[opcodeIndex]) + 1);
+            strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (size_t)(strlen(( * tokens)[opcodeIndex]) + 1));
         }
 
         if (operandIndex < step) {
@@ -695,7 +560,7 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
 
             for (int j = operandIndex; j < step; j++) {
                 ( * instructionTable)[ * tableCount].operands[j - operandIndex] = malloc(strlen(( * tokens)[j]) + 1);
-                strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], strlen(( * tokens)[j]) + 1);
+                strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (size_t)(strlen(( * tokens)[j]) + 1));
             }
             ( * instructionTable)[ * tableCount].opCount = step - operandIndex;
         }
@@ -711,7 +576,7 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
 
 /** +
  * @fn enum errorCode encodeORIG(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the ORIG instruction
  *
  * @param instruct
  * @param symbol
@@ -1884,7 +1749,7 @@ void lexer(char * line, char ** * tokens, int * len) {
         while (token != NULL) {
             * tokens = c == 0 ? malloc(sizeof(char * )) : realloc( * tokens, (c + 1) * sizeof(char * ));
             ( * tokens)[c] = malloc((strlen(token) + 1) * sizeof(char));
-            strncpy(( * tokens)[c], token, strlen(token) + 1);
+            strncpy(( * tokens)[c], token, (size_t)(strlen(token) + 1));
             toUpperCase(( * tokens)[c]);
 
             #ifdef Debug_Print
