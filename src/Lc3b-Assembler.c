@@ -1,7 +1,17 @@
 /*
-Name 1: AudiTT
-*/
+ ============================================================================
+ Name        : Lc3b-Assembler.c
+ Author      : 1sand0s
+ Version     :
+ Copyright   : Your copyright notice
+ Description : An Assembler for the Lc3B ISA, Ansi-style
+ ============================================================================
+ */
 
+/**
+ * @author 1sand0s
+ *
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -116,41 +126,41 @@ enum errorCode {
     OTHER_ERROR
 };
 
-enum pFSM pTransitions[68][5] = {					{ORIG, IMM, IGN, IGN, IGN}		,		{LABEL, ORIG, IMM, IGN, IGN},
-									{FILL, IMM, IGN, IGN, IGN}		, 		{LABEL, FILL, IMM, IGN, IGN},
-									{END, IGN, IGN, IGN, IGN}		,		{LABEL, END, IGN, IGN, IGN},
-									{ADD, REG, REG, IMM, IGN}		, 		{ADD, REG, REG, REG, IGN},
-									{LABEL, ADD, REG, REG, IMM}		, 		{LABEL, ADD, REG, REG, REG},
-									{AND, REG, REG, IMM, IGN}		, 		{AND, REG, REG, REG, IGN},
-									{LABEL, AND, REG, REG, IMM}		, 		{LABEL, AND, REG, REG, REG},
-									{XOR, REG, REG, IMM, IGN}		, 		{XOR, REG, REG, REG, IGN},
-									{LABEL, XOR, REG, REG, IMM}		, 		{LABEL, XOR, REG, REG, REG},		
-									{BR, LABEL, IGN, IGN, IGN}		, 		{LABEL, BR, LABEL, IGN, IGN},
-									{BRN, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRN, LABEL, IGN, IGN},
-									{BRZ, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRZ, LABEL, IGN, IGN},
-									{BRP, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRP, LABEL, IGN, IGN},
-									{BRNZ, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRNZ, LABEL, IGN, IGN},
-									{BRNP, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRNP, LABEL, IGN, IGN},
-									{BRZP, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRZP, LABEL, IGN, IGN},
-									{BRNZP, LABEL, IGN, IGN, IGN}		, 		{LABEL, BRNZP, LABEL, IGN, IGN},
-									{JMP, REG, IGN, IGN, IGN}		, 		{LABEL, JMP, REG, IGN, IGN},
-									{JSR, LABEL, IGN, IGN, IGN}		, 		{LABEL, JSR, LABEL, IGN, IGN},
-									{JSRR, REG, IGN, IGN, IGN}		, 		{LABEL, JSRR, REG, IGN, IGN},
-									{LDB, REG, REG, IMM, IGN}		, 		{LABEL, LDB, REG, REG, IMM},
-									{LDW, REG, REG, IMM, IGN}		, 		{LABEL, LDW, REG, REG, IMM},
-									{LEA, REG, LABEL, IGN, IGN}		, 		{LABEL, LEA, REG, LABEL, IGN},
-									{NOT, REG, REG, IGN, IGN}		, 		{LABEL, NOT, REG, REG, IGN},
-									{RET, IGN, IGN, IGN, IGN}		, 		{LABEL, RET, IGN, IGN, IGN},
-									{RTI, IGN, IGN, IGN, IGN}		, 		{LABEL, RTI, IGN, IGN, IGN},
-									{LSHF, REG, REG, IMM, IGN}		, 		{LABEL, LSHF, REG, REG, IMM},
-									{RSHFL, REG, REG, IMM, IGN}		, 		{LABEL, RSHFL, REG, REG, IMM},
-									{RSHFA, REG, REG, IMM, IGN}		, 		{LABEL, RSHFA, REG, REG, IMM},
-									{STB, REG, REG, IMM, IGN}		, 		{LABEL, STB, REG, REG, IMM},
-									{STW, REG, REG, IMM, IGN}		, 		{LABEL, STW, REG, REG, IMM},
-									{TRAP, IMM, IGN, IGN, IGN}		,		{LABEL, TRAP, IMM, IGN, IGN},
-									{HALT, IGN, IGN, IGN, IGN}		,		{LABEL, HALT, IGN, IGN, IGN},
-									{NOP, IGN, IGN, IGN, IGN}		, 		{LABEL, NOP, IGN, IGN, IGN}
-								};
+enum pFSM pTransitions[68][5] = {   {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
+                                    {FILL, IMM, IGN, IGN, IGN}      ,       {LABEL, FILL, IMM, IGN, IGN},
+                                    {END, IGN, IGN, IGN, IGN}       ,       {LABEL, END, IGN, IGN, IGN},
+                                    {ADD, REG, REG, IMM, IGN}       ,       {ADD, REG, REG, REG, IGN},
+                                    {LABEL, ADD, REG, REG, IMM}     ,       {LABEL, ADD, REG, REG, REG},
+                                    {AND, REG, REG, IMM, IGN}       ,       {AND, REG, REG, REG, IGN},
+                                    {LABEL, AND, REG, REG, IMM}     ,       {LABEL, AND, REG, REG, REG},
+                                    {XOR, REG, REG, IMM, IGN}       ,       {XOR, REG, REG, REG, IGN},
+                                    {LABEL, XOR, REG, REG, IMM}     ,       {LABEL, XOR, REG, REG, REG},
+                                    {BR, LABEL, IGN, IGN, IGN}      ,       {LABEL, BR, LABEL, IGN, IGN},
+                                    {BRN, LABEL, IGN, IGN, IGN}     ,       {LABEL, BRN, LABEL, IGN, IGN},
+                                    {BRZ, LABEL, IGN, IGN, IGN}     ,       {LABEL, BRZ, LABEL, IGN, IGN},
+                                    {BRP, LABEL, IGN, IGN, IGN}     ,       {LABEL, BRP, LABEL, IGN, IGN},
+                                    {BRNZ, LABEL, IGN, IGN, IGN}    ,       {LABEL, BRNZ, LABEL, IGN, IGN},
+                                    {BRNP, LABEL, IGN, IGN, IGN}    ,       {LABEL, BRNP, LABEL, IGN, IGN},
+                                    {BRZP, LABEL, IGN, IGN, IGN}    ,       {LABEL, BRZP, LABEL, IGN, IGN},
+                                    {BRNZP, LABEL, IGN, IGN, IGN}   ,       {LABEL, BRNZP, LABEL, IGN, IGN},
+                                    {JMP, REG, IGN, IGN, IGN}       ,       {LABEL, JMP, REG, IGN, IGN},
+                                    {JSR, LABEL, IGN, IGN, IGN}     ,       {LABEL, JSR, LABEL, IGN, IGN},
+                                    {JSRR, REG, IGN, IGN, IGN}      ,       {LABEL, JSRR, REG, IGN, IGN},
+                                    {LDB, REG, REG, IMM, IGN}       ,       {LABEL, LDB, REG, REG, IMM},
+                                    {LDW, REG, REG, IMM, IGN}       ,       {LABEL, LDW, REG, REG, IMM},
+                                    {LEA, REG, LABEL, IGN, IGN}     ,       {LABEL, LEA, REG, LABEL, IGN},
+                                    {NOT, REG, REG, IGN, IGN}       ,       {LABEL, NOT, REG, REG, IGN},
+                                    {RET, IGN, IGN, IGN, IGN}       ,       {LABEL, RET, IGN, IGN, IGN},
+                                    {RTI, IGN, IGN, IGN, IGN}       ,       {LABEL, RTI, IGN, IGN, IGN},
+                                    {LSHF, REG, REG, IMM, IGN}      ,       {LABEL, LSHF, REG, REG, IMM},
+                                    {RSHFL, REG, REG, IMM, IGN}     ,       {LABEL, RSHFL, REG, REG, IMM},
+                                    {RSHFA, REG, REG, IMM, IGN}     ,       {LABEL, RSHFA, REG, REG, IMM},
+                                    {STB, REG, REG, IMM, IGN}       ,       {LABEL, STB, REG, REG, IMM},
+                                    {STW, REG, REG, IMM, IGN}       ,       {LABEL, STW, REG, REG, IMM},
+                                    {TRAP, IMM, IGN, IGN, IGN}      ,       {LABEL, TRAP, IMM, IGN, IGN},
+                                    {HALT, IGN, IGN, IGN, IGN}      ,       {LABEL, HALT, IGN, IGN, IGN},
+                                    {NOP, IGN, IGN, IGN, IGN}       ,       {LABEL, NOP, IGN, IGN, IGN}
+                                };
 
 enum pFSM pStates[38] = {
     START,
@@ -343,7 +353,14 @@ int firstInstanceofOperands(enum pFSM * , int);
 /************************************************************************************************/
 
 
-
+/** +
+ * @fn int main(int, char**)
+ * @brief
+ *
+ * @param argc
+ * @param argv
+ * @return int
+ */
 int main(int argc, char ** argv) {
 
     enum errorCode errorp;
@@ -372,6 +389,14 @@ int main(int argc, char ** argv) {
     exit(errorp);
 }
 
+/** +
+ * @fn enum errorCode assemble(FILE*, FILE*)
+ * @brief
+ *
+ * @param in
+ * @param out
+ * @return errorCode
+ */
 enum errorCode assemble(FILE * in, FILE * out ) {
     symbol * symbolTable = malloc(sizeof(struct symbol));
     instruction * instructionTable = malloc(sizeof(struct instruction));
@@ -450,22 +475,22 @@ enum errorCode assemble(FILE * in, FILE * out ) {
 
             }
 
-	    #ifdef Debug_Print_InstructionTable
-            	printf("%d\t", errorp);
-	    #endif
+        #ifdef Debug_Print_InstructionTable
+                printf("%d\t", errorp);
+        #endif
 
             if (errorp == OK_VALID) {
                 char * enc = NULL;
                 if (instructionTable[j].encoding != NULL) {
                     enc = bin2hex((instructionTable[j].encoding));
                     prepend( & enc, "0x");
-		    fprintf(out, "%s\n", enc);
+            fprintf(out, "%s\n", enc);
                 }
-		                
-		#ifdef Debug_Print_InstructionTable
-			printf("%s", enc);
-                	printf("\n");
-		#endif
+
+        #ifdef Debug_Print_InstructionTable
+            printf("%s", enc);
+                    printf("\n");
+        #endif
                 free(enc);
             } else
                 break;
@@ -566,8 +591,8 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
             break;
 
         case STOP:
-	    if(startAddr)
-            	free(startAddr);
+        if(startAddr)
+                free(startAddr);
             errorp = errorp == OK_VALID ? OTHER_ERROR : errorp;
             flag = false;
             break;
@@ -583,6 +608,17 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
     return errorp;
 }
 
+/** +
+ * @fn void insertSymbol(symbol**, int*, char*, int, char*)
+ * @brief
+ *
+ * @param symbolTable
+ * @param tableCount
+ * @param label
+ * @param line
+ * @param startAddr
+ * @return void
+ */
 void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int line, char * startAddr) {
     if ( * tableCount > 0) {
 
@@ -610,6 +646,19 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
     }
 }
 
+/**+
+ * @fn void insertInstruction(instruction**, int*, char***, enum pFSM*, int, int, char*)
+ * @brief
+ *
+ * @param instructionTable
+ * @param tableCount
+ * @param tokens
+ * @param stateTransition
+ * @param step
+ * @param line
+ * @param startAddr
+ * @return void
+ */
 void insertInstruction(instruction ** instructionTable, int * tableCount, char ** * tokens, enum pFSM * stateTransition, int step, int line, char * startAddr) {
 
     {
@@ -660,6 +709,15 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
     }
 }
 
+/** +
+ * @fn enum errorCode encodeORIG(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
     if ((( * instruct).addr) % 2 != 0)
         return INVALID_CONSTANT;
@@ -671,11 +729,20 @@ enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeFILL(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
 
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
-	
+
     int constant = strtol((*instruct).operands[0] + 1, NULL, 10);
 
     if(constant < -32768 || constant > 65535)
@@ -694,10 +761,28 @@ enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeEND(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeEND(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeNOP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeNOP(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -710,13 +795,22 @@ enum errorCode encodeNOP(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeTRAP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeTRAP(instruction * instruct, symbol * symbol, int count) {
-   
+
     int op = strtol(( * instruct).operands[0] + 1, NULL, 10);
 
     if(op<0 || op > 255)
-	return INVALID_CONSTANT;
-    
+    return INVALID_CONSTANT;
+
 
     char * str = calloc(17, sizeof(char));
 
@@ -732,6 +826,15 @@ enum errorCode encodeTRAP(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeHALT(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeHALT(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -746,6 +849,15 @@ enum errorCode encodeHALT(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeADD(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -784,6 +896,15 @@ enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeXOR(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -821,6 +942,15 @@ enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeAND(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -860,6 +990,15 @@ enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeJMP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeJMP(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -879,6 +1018,15 @@ enum errorCode encodeJMP(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeRET(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeRET(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -894,6 +1042,15 @@ enum errorCode encodeRET(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeJSR(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeJSR(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -921,6 +1078,15 @@ enum errorCode encodeJSR(instruction * instruct, symbol * sym, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeBR(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBR(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -949,6 +1115,15 @@ enum errorCode encodeBR(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRN(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRN(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -977,6 +1152,15 @@ enum errorCode encodeBRN(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRZ(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRZ(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1005,6 +1189,15 @@ enum errorCode encodeBRZ(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRP(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1033,6 +1226,15 @@ enum errorCode encodeBRP(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRNZ(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRNZ(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1061,6 +1263,15 @@ enum errorCode encodeBRNZ(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRNP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRNP(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1089,6 +1300,15 @@ enum errorCode encodeBRNP(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRZP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRZP(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1117,6 +1337,15 @@ enum errorCode encodeBRZP(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeBRNZP(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeBRNZP(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1145,6 +1374,15 @@ enum errorCode encodeBRNZP(instruction * instruct, symbol * sym, int count) {
         return UNDEFINED_LABEL;
 }
 
+/** +
+ * @fn enum errorCode encodeJSRR(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeJSRR(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1164,6 +1402,15 @@ enum errorCode encodeJSRR(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeLDB(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1195,6 +1442,15 @@ enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeLDW(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1226,6 +1482,15 @@ enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
     return OK_VALID;
 }
 
+/** +
+ * @fn enum errorCode encodeLEA(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param sym
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeLEA(instruction * instruct, symbol * sym, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1257,6 +1522,15 @@ enum errorCode encodeLEA(instruction * instruct, symbol * sym, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeNOT(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeNOT(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1279,6 +1553,15 @@ enum errorCode encodeNOT(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeRTI(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeRTI(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1294,6 +1577,15 @@ enum errorCode encodeRTI(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeLSHF(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1309,7 +1601,7 @@ enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
     strcat(str, "00");
 
     if (strtol(( * instruct).operands[2] + 1, NULL, 10) > 15 ||
-	strtol(( * instruct).operands[2] + 1, NULL, 10) < 0) {
+    strtol(( * instruct).operands[2] + 1, NULL, 10) < 0) {
         free(dr);
         free(sr);
         free(str);
@@ -1328,6 +1620,15 @@ enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeRSHFL(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1343,7 +1644,7 @@ enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
     strcat(str, "01");
 
     if (strtol(( * instruct).operands[2] + 1, NULL, 10) > 15 ||
-	strtol(( * instruct).operands[2] + 1, NULL, 10) < 0) {
+    strtol(( * instruct).operands[2] + 1, NULL, 10) < 0) {
         free(dr);
         free(sr);
         free(str);
@@ -1362,6 +1663,15 @@ enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeRSHFA(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1377,7 +1687,7 @@ enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
     strcat(str, "11");
 
     if (strtol(( * instruct).operands[2] + 1, NULL, 10) > 15 ||
-	strtol(( * instruct).operands[2] + 1, NULL, 10) < 0) {
+    strtol(( * instruct).operands[2] + 1, NULL, 10) < 0) {
         free(dr);
         free(sr);
         free(str);
@@ -1396,6 +1706,15 @@ enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeSTB(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1428,6 +1747,15 @@ enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn enum errorCode encodeSTW(instruction*, symbol*, int)
+ * @brief
+ *
+ * @param instruct
+ * @param symbol
+ * @param count
+ * @return errorCode
+ */
 enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1461,6 +1789,14 @@ enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
 
 }
 
+/** +
+ * @fn void freeLexemes(char***, int*)
+ * @brief
+ *
+ * @param lexemes
+ * @param len
+ * @return void
+ */
 void freeLexemes(char ** * lexemes, int * len) {
     for (int i = 0; i < * len; i++) {
         free(( * lexemes)[i]);
@@ -1469,6 +1805,14 @@ void freeLexemes(char ** * lexemes, int * len) {
     free( * lexemes);
 }
 
+/** +
+ * @fn void freeSymbolTable(symbol**, int*)
+ * @brief
+ *
+ * @param symbolTable
+ * @param tableCount
+ * @return void
+ */
 void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
 
     for (int j = 0; j < * tableCount; j++) {
@@ -1478,6 +1822,14 @@ void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
     free( * symbolTable);
 }
 
+/** +
+ * @fn void freeInstructionTable(instruction**, int*)
+ * @brief
+ *
+ * @param instructionTable
+ * @param tableCount
+ * @return void
+ */
 void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
     for (int j = 0; j < * tableCount; j++) {
         free(( * instructionTable)[j].label);
@@ -1495,6 +1847,15 @@ void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
     free( * instructionTable);
 }
 
+/** +
+ * @fn void lexer(char*, char***, int*)
+ * @brief
+ *
+ * @param line
+ * @param tokens
+ * @param len
+ * @return void
+ */
 void lexer(char * line, char ** * tokens, int * len) {
 
     #ifdef Debug_Print
@@ -1510,7 +1871,7 @@ void lexer(char * line, char ** * tokens, int * len) {
 
         char * subbuff = malloc(index + 1);
         strncpy(subbuff, &line[0], index);
-	subbuff[index] = '\0';
+    subbuff[index] = '\0';
 
         #ifdef Debug_Print
         printf("%s\n", subbuff);
@@ -1527,7 +1888,7 @@ void lexer(char * line, char ** * tokens, int * len) {
             toUpperCase(( * tokens)[c]);
 
             #ifdef Debug_Print
-            //                  	printf("%s \n",token);
+            //                      printf("%s \n",token);
             #endif
 
             token = strtok(NULL, " ,\n\t");
@@ -1546,6 +1907,13 @@ void lexer(char * line, char ** * tokens, int * len) {
 
 }
 
+/** +
+ * @fn int hex2dec(char*)
+ * @brief
+ *
+ * @param str
+ * @return int
+ */
 int hex2dec(char * str) {
     int dec = INT_MAX;
     bool valid = true;
@@ -1568,6 +1936,13 @@ int hex2dec(char * str) {
     return dec;
 }
 
+/** +
+ * @fn char dec2hex*(int)
+ * @brief
+ *
+ * @param dec
+ * @return char*
+ */
 char * dec2hex(int dec) {
     char * hex = malloc(sizeof(char * ));
 
@@ -1576,6 +1951,14 @@ char * dec2hex(int dec) {
     return hex;
 }
 
+/** +
+ * @fn void prepend(char**, char*)
+ * @brief
+ *
+ * @param str
+ * @param p
+ * @return void
+ */
 void prepend(char ** str, char * p) {
     char * str2 = calloc(strlen( * str) + strlen(p) + 1, sizeof(char));
 
@@ -1586,6 +1969,13 @@ void prepend(char ** str, char * p) {
     * str = str2;
 }
 
+/** +
+ * @fn char bin2hex*(char*)
+ * @brief
+ *
+ * @param dec
+ * @return char*
+ */
 char * bin2hex(char * dec) {
 
     int dec2 = strtol(dec, NULL, 2);
@@ -1593,6 +1983,13 @@ char * bin2hex(char * dec) {
     return dec2hex(dec2);
 }
 
+/** +
+ * @fn char dec2bin*(int)
+ * @brief
+ *
+ * @param dec
+ * @return char*
+ */
 char * dec2bin(int dec) {
     char * dst = calloc(17, sizeof(char));
 
@@ -1606,12 +2003,26 @@ char * dec2bin(int dec) {
     return dst;
 }
 
+/** +
+ * @fn char dec2dec*(int)
+ * @brief
+ *
+ * @param dec
+ * @return char*
+ */
 char * dec2dec(int dec) {
     char * dst = int2str(dec);
     prepend( & dst, "#");
     return dst;
 }
 
+/** +
+ * @fn int dec2dec2(char*)
+ * @brief
+ *
+ * @param dec
+ * @return int
+ */
 int dec2dec2(char * dec) {
     if (isValidDec(dec))
         return strtol((dec + 1), NULL, 10);
@@ -1619,6 +2030,13 @@ int dec2dec2(char * dec) {
         return INT_MAX;
 }
 
+/** +
+ * @fn char int2str*(int)
+ * @brief
+ *
+ * @param dec
+ * @return char*
+ */
 char * int2str(int dec) {
     char * str = malloc(sizeof(char * ));
 
@@ -1627,6 +2045,13 @@ char * int2str(int dec) {
     return str;
 }
 
+/** +
+ * @fn bool isValidHex(char*)
+ * @brief
+ *
+ * @param str
+ * @return bool
+ */
 bool isValidHex(char * str) {
 
     bool valid = false;
@@ -1641,6 +2066,13 @@ bool isValidHex(char * str) {
     return valid;
 }
 
+/** +
+ * @fn bool isValidDec(char*)
+ * @brief
+ *
+ * @param str
+ * @return bool
+ */
 bool isValidDec(char * str) {
 
     bool valid = false;
@@ -1662,6 +2094,13 @@ bool isValidDec(char * str) {
     return valid;
 }
 
+/** +
+ * @fn enum pFSM checkLabel(char*)
+ * @brief
+ *
+ * @param str
+ * @return pFSM
+ */
 enum pFSM checkLabel(char * str) {
     bool flag = true;
 
@@ -1682,6 +2121,13 @@ enum pFSM checkLabel(char * str) {
     return flag ? LABEL : INVALID;
 }
 
+/** +
+ * @fn enum pFSM checkpOP(char*)
+ * @brief
+ *
+ * @param str
+ * @return pFSM
+ */
 enum pFSM checkpOP(char * str) {
     if (strncmp(str, ".ORIG", strlen(str)) == 0 && (strlen(str) == strlen(".ORIG")))
         return ORIG;
@@ -1696,6 +2142,13 @@ enum pFSM checkpOP(char * str) {
         return INVALID;
 }
 
+/** +
+ * @fn enum pFSM checkInst(char*)
+ * @brief
+ *
+ * @param str
+ * @return pFSM
+ */
 enum pFSM checkInst(char * str) {
     enum pFSM op = INVALID;
 
@@ -1713,6 +2166,13 @@ enum pFSM checkInst(char * str) {
     return op;
 }
 
+/** +
+ * @fn enum pFSM checkRegister(char*)
+ * @brief
+ *
+ * @param str
+ * @return pFSM
+ */
 enum pFSM checkRegister(char * str) {
     enum pFSM op = INVALID;
 
@@ -1730,6 +2190,13 @@ enum pFSM checkRegister(char * str) {
     return op;
 }
 
+/** +
+ * @fn enum pFSM checkImmidiate(char**)
+ * @brief
+ *
+ * @param str
+ * @return pFSM
+ */
 enum pFSM checkImmidiate(char ** str) {
     enum pFSM op = INVALID;
 
@@ -1748,6 +2215,15 @@ enum pFSM checkImmidiate(char ** str) {
     return op;
 }
 
+/** +
+ * @fn enum errorCode integrityCheck(char***, int*, enum pFSM**)
+ * @brief
+ *
+ * @param tokens
+ * @param count
+ * @param stateTransition
+ * @return errorCode
+ */
 enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateTransition) {
 
     int step = 0;
@@ -1766,16 +2242,16 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
 
         ( * stateTransition)[step] = state;
 
-	if(state == TRAP)
-	{
-		if(step < *count)
-		{
-			if(!isValidHex((*tokens)[step + 1]))
-			{
-				return INVALID_CONSTANT;
-			}
-		}
-	}
+    if(state == TRAP)
+    {
+        if(step < *count)
+        {
+            if(!isValidHex((*tokens)[step + 1]))
+            {
+                return INVALID_CONSTANT;
+            }
+        }
+    }
         step++;
     }
 
@@ -1820,6 +2296,14 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
     return OK_VALID;
 }
 
+/** +
+ * @fn int firstInstanceofLabel(enum pFSM*, int)
+ * @brief
+ *
+ * @param states
+ * @param len
+ * @return int
+ */
 int firstInstanceofLabel(enum pFSM * states, int len) {
     int j = 0;
 
@@ -1830,6 +2314,14 @@ int firstInstanceofLabel(enum pFSM * states, int len) {
     return j;
 }
 
+/** +
+ * @fn int firstInstanceofDirective(enum pFSM*, int)
+ * @brief
+ *
+ * @param states
+ * @param len
+ * @return int
+ */
 int firstInstanceofDirective(enum pFSM * states, int len) {
     int j = 0;
 
@@ -1841,6 +2333,14 @@ int firstInstanceofDirective(enum pFSM * states, int len) {
 
 }
 
+/** +
+ * @fn int firstInstanceofOpcode(enum pFSM*, int)
+ * @brief
+ *
+ * @param states
+ * @param len
+ * @return int
+ */
 int firstInstanceofOpcode(enum pFSM * states, int len) {
     int j = 0;
 
@@ -1857,6 +2357,14 @@ int firstInstanceofOpcode(enum pFSM * states, int len) {
     return j;
 }
 
+/** +
+ * @fn int firstInstanceofOperands(enum pFSM*, int)
+ * @brief
+ *
+ * @param states
+ * @param len
+ * @return int
+ */
 int firstInstanceofOperands(enum pFSM * states, int len) {
     int j = 0;
 
@@ -1868,6 +2376,15 @@ int firstInstanceofOperands(enum pFSM * states, int len) {
 
 }
 
+/** +
+ * @fn int getAddrofLabel(symbol*, int, char*)
+ * @brief
+ *
+ * @param sym
+ * @param count
+ * @param label
+ * @return int
+ */
 int getAddrofLabel(symbol * sym, int count, char * label) {
     int addr = -1;
 
@@ -1881,6 +2398,15 @@ int getAddrofLabel(symbol * sym, int count, char * label) {
     return addr;
 }
 
+/** +
+ * @fn bool checkValidRange(int, int)
+ * @brief
+ *
+ * @param dec
+ * @param numBytes
+ * @return bool
+ */
 bool checkValidRange(int dec, int numBytes) {
     return ((dec <= (pow(2, numBytes - 1) - 1)) && (dec >= -pow(2, numBytes - 1)));
 }
+
