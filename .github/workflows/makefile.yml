@@ -18,4 +18,4 @@ jobs:
       run: ./configure
       
     - name: Install dependencies
-      run: src/make install
+      run: make
