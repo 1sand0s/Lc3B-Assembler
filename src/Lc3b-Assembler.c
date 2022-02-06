@@ -22,9 +22,54 @@
 #include <limits.h>
 #include "Lc3b-Assembler.h"
 
+/** +
+ * @def Debug_Print
+ * @brief Comment to stop printing the tokens during lexing
+ *
+ */
 //#define Debug_Print
+
+/** +
+ * @def Debug_Print_InstructionTable
+ * @brief Comment to stop printing the Instruction table to stdout
+ *
+ */
 #define Debug_Print_InstructionTable
+
+/** +
+ * @def Debug_Print_SymbolTable
+ * @brief Comment to stop printing the Symbol table to stdout
+ *
+ */
 #define Debug_Print_SymbolTable
+
+/** +
+ * @def INDENT_SYMBOL_
+ * @brief Number of spaces for indenting symbol table during printing
+ *
+ */
+#define INDENT_SYMBOL_ 40
+
+/** +
+ * @def INDENT_INSTRUCTION_
+ * @brief Number of spaces for indenting instruction table during prinitng
+ *
+ */
+#define INDENT_INSTRUCTION_ 10
+
+/** +
+ * @def MAX_INSTRUCTION_LENGTH_
+ * @brief Maximum length/number of tokens allowed in a valid instruction
+ *
+ */
+#define MAX_INSTRUCTION_LENGTH_ 5
+
+/** +
+ * @def MAX_VALID_COMBINATIONS_
+ * @brief Number of valid combinations of tokens
+ *
+ */
+#define MAX_VALID_COMBINATIONS_ 68
 
 
 char * inval[43] = {
@@ -73,9 +118,9 @@ char * inval[43] = {
     "R7"
 };
 
-
-
-enum pFSM pTransitions[68][5] = {   {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
+/* Valid State Transistions for tokens of an instruction */
+enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] = {
+                                    {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
                                     {FILL, IMM, IGN, IGN, IGN}      ,       {LABEL, FILL, IMM, IGN, IGN},
                                     {END, IGN, IGN, IGN, IGN}       ,       {LABEL, END, IGN, IGN, IGN},
                                     {ADD, REG, REG, IMM, IGN}       ,       {ADD, REG, REG, REG, IGN},
@@ -199,35 +244,37 @@ enum errorCode( * encoder[31])(instruction * , symbol * , int) = {
  * @fn int main(int, char**)
  * @brief main method
  *
- * @param argc
- * @param argv
- * @return int
+ * @param argc  Number of commnadline arguements
+ * @param argv  Name of commandline arguements
+ * @return int  Exit code
  */
 int main(int argc, char ** argv) {
 
-    enum errorCode errorp;
+    enum errorCode errorp; //Holds the type error encountered during assembly
+
+    /* Two arguements from command line expected
+     * 1. argv[1] : Name of the file containing assembly code <*.asm>
+     * 2. argv[2] : Name of the file to write assembled hex code to <*.hex> */
     if (argc == 3) {
-        FILE * infile = fopen(argv[1], "r");
-        FILE * outfile = fopen(argv[2], "w");
+        FILE * infile = fopen(argv[1], "r"); //Open *.asm for read-only
+        FILE * outfile = fopen(argv[2], "w"); //Open *.hex for write-mode
 
         if (!infile) {
-            //printf("Could not open input file \"%s\"", argv[1]);
-            exit(4);
-        } else if (!outfile) {
-            //printf("Could not open output file \"%s\"", argv[2]);
-            exit(4);
-        } else {
+            exit(OTHER_ERROR); //Unable to open *.asm file
+        }
+        else if (!outfile) {
+            exit(OTHER_ERROR); //Unable to open *.hex file
+        }
+        else {
+            /* Begin assembly if expected number of arguments is correct */
             errorp = assemble(infile, outfile);
-
             fclose(infile);
             fclose(outfile);
         }
-    } else {
-
-        //printf("Input and Output file expected");
-        exit(4);
     }
-
+    else {
+        exit(OTHER_ERROR); //Missing commandline arguements
+    }
     exit(errorp);
 }
 
@@ -242,47 +289,47 @@ int main(int argc, char ** argv) {
 enum errorCode assemble(FILE * in, FILE * out ) {
     symbol * symbolTable = malloc(sizeof(struct symbol));
     instruction * instructionTable = malloc(sizeof(struct instruction));
-
     int tableCount = 0;
     int tableCount2 = 0;
     enum errorCode errorp;
 
+    /* Create symbol table */
     errorp = createSymbolTable( in , START, & symbolTable, & tableCount, & instructionTable, & tableCount2);
 
+    /* If no errors then proceed with printing/writing to file */
     if (errorp == OK_VALID) {
-        #ifdef Debug_Print_SymbolTable
+#ifdef Debug_Print_SymbolTable //Comment out MACRO definition to stop printing symbol table
 
         printf("\n\n\n");
         char * header = "/*******************Symbol Table*************************/";
         char * ender = "/********************************************************/";
 
-        printWithIndent(header, 40);
+        printWithIndent(header, INDENT_SYMBOL_);
         printf("\n");
         for (int j = 0; j < tableCount; j++) {
-            printWithIndent("*", 40);
-            char * addr = dec2hex(symbolTable[j].addr);
+            printWithIndent("*", INDENT_SYMBOL_);
+            char * addr = dec2hex(symbolTable[j].addr); //Convert base10 address to hex string
             printf("\t%-10s\t|\t%d(0x%s)\t\t*", symbolTable[j].symbolName, symbolTable[j].addr, addr);
             printf("\n");
-            free(addr);
+            free(addr); // Free hex string
         }
-        printWithIndent(ender, 40);
+        printWithIndent(ender, INDENT_SYMBOL_);
         printf("\n");
-        #endif
+#endif
 
-        #ifdef Debug_Print_InstructionTable
-
+#ifdef Debug_Print_InstructionTable //Comment out MACRO definition to stop printing instruction table
         printf("\n\n\n");
         char * header1 = "/****************************************************Instruction Table*****************************************************************/";
         char * ender1 = "/**************************************************************************************************************************************/";
 
-        printWithIndent(header1, 10);
+        printWithIndent(header1, INDENT_INSTRUCTION_);
         printf("\n");
-        printWithIndent("*", 10);
+        printWithIndent("*", INDENT_INSTRUCTION_);
         printf("\t%-10s\t|\t%-10s\t|\t%-10s\t|\t%-10s\t|\t%-10s\t\t%10s", "ADDRESS", "LABEL", "Directive", "Opcode", "Operands", "*");
         printf("\n");
         for (int j = 0; j < tableCount2; j++) {
-            printWithIndent("*", 10);
-            char * hex = dec2hex(instructionTable[j].addr);
+            printWithIndent("*", INDENT_INSTRUCTION_);
+            char * hex = dec2hex(instructionTable[j].addr); //Convert base10 address to hex string
             printf("\t%d (0x%s)\t", instructionTable[j].addr, hex);
             printf("\t%-10s\t\t%-10s\t\t%-10s\t\t", instructionTable[j].label, instructionTable[j].directive, instructionTable[j].opcode);
             int i = 0;
@@ -294,31 +341,33 @@ enum errorCode assemble(FILE * in, FILE * out ) {
             for (; i < 3; i++)
                 printf("\t");
             printf("%10s\n", "*");
-            free(hex);
+            free(hex); // Free hex string
         }
-        printWithIndent(ender1, 10);
+        printWithIndent(ender1, INDENT_INSTRUCTION_);
         printf("\n");
-        #endif
+#endif
 
+        /* Iterate through instruction table entries to encode them */
         for (int j = 0; j < tableCount2; j++) {
             for (int i = 4; i < 35; i++) {
+                /* Encode Directives */
                 if (instructionTable[j].directive != NULL) {
                     if (strncmp(instructionTable[j].directive, inval[i], strlen(inval[i])) == 0 &&
                         strlen(instructionTable[j].directive) == strlen(inval[i])) {
                         errorp = encoder[i - 4]( & (instructionTable[j]), symbolTable, tableCount);
                     }
-                } else if (instructionTable[j].opcode != NULL) {
+                }
+                /* Encode Instructions */
+                else if (instructionTable[j].opcode != NULL) {
                     if (strncmp(instructionTable[j].opcode, inval[i], strlen(inval[i])) == 0 &&
                         strlen(instructionTable[j].opcode) == strlen(inval[i])) {
                         errorp = encoder[i - 4]( & (instructionTable[j]), symbolTable, tableCount);
                     }
                 }
-
             }
-
-        #ifdef Debug_Print_InstructionTable
+#ifdef Debug_Print_InstructionTable
             printf("%d\t", errorp);
-        #endif
+#endif
             if (errorp == OK_VALID) {
                 char * enc = NULL;
                 if (instructionTable[j].encoding != NULL) {
@@ -326,22 +375,21 @@ enum errorCode assemble(FILE * in, FILE * out ) {
                     prepend( & enc, "0x");
                     fprintf(out, "%s\n", enc);
                 }
-
-        #ifdef Debug_Print_InstructionTable
+#ifdef Debug_Print_InstructionTable
             printf("%s", enc);
             printf("\n");
-        #endif
+#endif
             free(enc);
             }
             else
                 break;
-
         }
     }
+    freeSymbolTable( & symbolTable, & tableCount); //Free the symbol table
+    freeInstructionTable( & instructionTable, & tableCount2); //Free the instruction table
 
-    freeSymbolTable( & symbolTable, & tableCount);
-    freeInstructionTable( & instructionTable, & tableCount2);
-
+    /* return the errorcode
+     * Should be OK_VALID is no errors */
     return errorp;
 }
 
@@ -486,7 +534,6 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
  */
 void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int line, char * startAddr) {
     if ( * tableCount > 0) {
-
         int j = 0;
 
         for (; j < * tableCount; j++) {
@@ -570,7 +617,6 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
         }
 
         * tableCount = * tableCount + 1;
-
     }
 }
 
@@ -1723,9 +1769,9 @@ void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
  */
 void lexer(char * line, char ** * tokens, int * len) {
 
-    #ifdef Debug_Print
+#ifdef Debug_Print
     printf("\n%s\n", line);
-    #endif
+#endif
 
     size_t index = strcspn(line, ";");
 
@@ -1738,9 +1784,9 @@ void lexer(char * line, char ** * tokens, int * len) {
         strncpy(subbuff, &line[0], index);
     subbuff[index] = '\0';
 
-        #ifdef Debug_Print
+#ifdef Debug_Print
         printf("%s\n", subbuff);
-        #endif
+#endif
 
         char * token = strtok(subbuff, " ,\n\t");
         //*tokens = malloc(sizeof(char*));
@@ -1751,11 +1797,6 @@ void lexer(char * line, char ** * tokens, int * len) {
             ( * tokens)[c] = malloc((strlen(token) + 1) * sizeof(char));
             strncpy(( * tokens)[c], token, (size_t)(strlen(token) + 1));
             toUpperCase(( * tokens)[c]);
-
-            #ifdef Debug_Print
-            //                      printf("%s \n",token);
-            #endif
-
             token = strtok(NULL, " ,\n\t");
             c++;
         }
@@ -1767,7 +1808,6 @@ void lexer(char * line, char ** * tokens, int * len) {
         /***************************************************************/
 
         /*************************************************************************************************/
-
     }
 
 }
@@ -2027,7 +2067,6 @@ enum pFSM checkInst(char * str) {
             }
         }
     }
-
     return op;
 }
 
@@ -2051,7 +2090,6 @@ enum pFSM checkRegister(char * str) {
             }
         }
     }
-
     return op;
 }
 
@@ -2072,11 +2110,11 @@ enum pFSM checkImmidiate(char ** str) {
             * str = int2str(dec);
             prepend(str, "#");
             op = IMM;
-        } else if (isValidDec( * str)) {
+        }
+        else if (isValidDec( * str)) {
             op = IMM;
         }
     }
-
     return op;
 }
 
@@ -2095,28 +2133,26 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
     bool flag;
     enum pFSM state = START;
 
-    * stateTransition = malloc(sizeof(enum pFSM));
+    *stateTransition = malloc(sizeof(enum pFSM));
 
-    while (step < * count) {
-        * stateTransition = realloc( * stateTransition, (step + 1) * sizeof(enum pFSM));
-        state = checkLabel(( * tokens)[step]);
-        state = state == INVALID ? checkpOP(( * tokens)[step]) : state;
-        state = state == INVALID ? checkInst(( * tokens)[step]) : state;
-        state = state == INVALID ? checkRegister(( * tokens)[step]) : state;
-        state = state == INVALID ? checkImmidiate( & (( * tokens)[step])) : state;
+    while (step < *count) {
+        *stateTransition = realloc(*stateTransition,
+                                   (step + 1) * sizeof(enum pFSM));
+        state = checkLabel((*tokens)[step]);
+        state = state == INVALID ? checkpOP((*tokens)[step]) : state;
+        state = state == INVALID ? checkInst((*tokens)[step]) : state;
+        state = state == INVALID ? checkRegister((*tokens)[step]) : state;
+        state = state == INVALID ? checkImmidiate(&((*tokens)[step])) : state;
 
-        ( * stateTransition)[step] = state;
+        (*stateTransition)[step] = state;
 
-    if(state == TRAP)
-    {
-        if(step < *count)
-        {
-            if(!isValidHex((*tokens)[step + 1]))
-            {
-                return INVALID_CONSTANT;
+        if (state == TRAP) {
+            if (step < *count) {
+                if (!isValidHex((*tokens)[step + 1])) {
+                    return INVALID_CONSTANT;
+                }
             }
         }
-    }
         step++;
     }
 
@@ -2126,7 +2162,7 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
         int j = 0;
 
         for (; j < step; j++) {
-            flag &= (( * stateTransition)[j] == pTransitions[i][j]);
+            flag &= ((*stateTransition)[j] == pTransitions[i][j]);
         }
 
         if (flag) {
@@ -2138,25 +2174,27 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
     }
 
     if (!flag) {
-        int i = firstInstanceofOperands( * stateTransition, step);
+        int i = firstInstanceofOperands(*stateTransition,
+                                        step);
 
         if (i == 0) {
-            if (( * stateTransition)[0] != ORIG &&
-                ( * stateTransition)[0] != FILL &&
-                ( * stateTransition)[0] != END) {
+            if ((*stateTransition)[0] != ORIG && (*stateTransition)[0] != FILL
+                    && (*stateTransition)[0] != END) {
                 return INVALID_OPCODE;
             }
         } else {
-            if (( * stateTransition)[i - 1] == LABEL)
+            if ((*stateTransition)[i - 1] == LABEL)
                 return INVALID_OPCODE;
         }
         return OTHER_ERROR;
     }
 
-    #ifdef Debug_Print
-    if (flag) printf("True\n");
-    else printf("False\n");
-    #endif
+#ifdef Debug_Print
+    if (flag)
+        printf("True\n");
+    else
+        printf("False\n");
+#endif
 
     return OK_VALID;
 }
@@ -2171,11 +2209,9 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
  */
 int firstInstanceofLabel(enum pFSM * states, int len) {
     int j = 0;
-
     for (; j < len; j++) {
         if (states[j] == LABEL) break;
     }
-
     return j;
 }
 
@@ -2189,13 +2225,10 @@ int firstInstanceofLabel(enum pFSM * states, int len) {
  */
 int firstInstanceofDirective(enum pFSM * states, int len) {
     int j = 0;
-
     for (; j < len; j++) {
         if (states[j] == ORIG || states[j] == FILL || states[j] == END) break;
     }
-
     return j;
-
 }
 
 /** +
@@ -2208,17 +2241,13 @@ int firstInstanceofDirective(enum pFSM * states, int len) {
  */
 int firstInstanceofOpcode(enum pFSM * states, int len) {
     int j = 0;
-
     for (; j < len; j++) {
         int i = 0;
-
         for (; i < 28; i++) {
             if (states[j] == pStates[i + 5]) break;
         }
-
         if (i != 28) break;
     }
-
     return j;
 }
 
@@ -2232,13 +2261,10 @@ int firstInstanceofOpcode(enum pFSM * states, int len) {
  */
 int firstInstanceofOperands(enum pFSM * states, int len) {
     int j = 0;
-
     for (; j < len; j++) {
         if (states[j] == REG || states[j] == IMM || (states[j] == LABEL && j > 0)) break;
     }
-
     return j;
-
 }
 
 /** +
@@ -2252,7 +2278,6 @@ int firstInstanceofOperands(enum pFSM * states, int len) {
  */
 int getAddrofLabel(symbol * sym, int count, char * label) {
     int addr = -1;
-
     for (int j = 0; j < count; j++) {
         if (strlen(label) == strlen(sym[j].symbolName)) {
             if (strncmp(label, sym[j].symbolName, strlen(label)) == 0) {
