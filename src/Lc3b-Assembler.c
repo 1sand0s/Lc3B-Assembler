@@ -376,10 +376,10 @@ enum errorCode assemble(FILE * in, FILE * out ) {
                     fprintf(out, "%s\n", enc);
                 }
 #ifdef Debug_Print_InstructionTable
-            printf("%s", enc);
-            printf("\n");
+                printf("%s", enc);
+                printf("\n");
 #endif
-            free(enc);
+                free(enc);
             }
             else
                 break;
@@ -389,7 +389,7 @@ enum errorCode assemble(FILE * in, FILE * out ) {
     freeInstructionTable( & instructionTable, & tableCount2); //Free the instruction table
 
     /* return the errorcode
-     * Should be OK_VALID is no errors */
+     * Should be OK_VALID if no errors */
     return errorp;
 }
 
@@ -412,6 +412,7 @@ void printWithIndent(char * text, int indent) {
  */
 void toUpperCase(char * str) {
     for (int i = 0; i < strlen(str); i++) {
+        /* Check if alphabet before converting to uppercase */
         if (isalpha(str[i]) != 0)
             str[i] = toupper(str[i]);
     }
@@ -536,23 +537,38 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
     if ( * tableCount > 0) {
         int j = 0;
 
+        /* Check if symbol exists in symbol table
+         * LABELS(Symbols) can be defined somewhere and referenced elesewhere
+         * We don't want to add duplicate entries*/
         for (; j < * tableCount; j++) {
             if (strncmp(( * symbolTable)[j].symbolName, label, strlen(label)) == 0) {
                 break;
             }
         }
 
+        /* If symbol/label not found in symbol table then add to symbol table*/
         if (j == * tableCount) {
+
+            /* Increase memory allocation to symbol table to insert new symbol */
             * symbolTable = realloc( * symbolTable, (j + 1) * sizeof(struct symbol));
             ( * symbolTable)[j].symbolName = malloc(strlen(label) + 1);
+
+            /* Copy label into symbol table */
             strncpy(( * symbolTable)[j].symbolName, label, (size_t)(strlen(label) + 1));
+
+            /* Copy address(base10) into symbol table */
             ( * symbolTable)[j].addr = dec2dec2(startAddr) + (line - 1) * 2;
             * tableCount = ( * tableCount) + 1;
         }
-
-    } else {
+    }
+    else {
+        /* Allocate memory to hold the label name*/
         ( * symbolTable)[0].symbolName = malloc(strlen(label) + 1);
+
+        /* Copy label into symbol table */
         strncpy(( * symbolTable)[0].symbolName, label, (size_t)(strlen(label) + 1));
+
+        /* Copy address(base10) into symbol table */
         ( * symbolTable)[0].addr = dec2dec2(startAddr) + (line - 1) * 2;
         * tableCount = ( * tableCount) + 1;
     }
@@ -564,65 +580,79 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
  *
  * @param instructionTable  The instruction table
  * @param tableCount        Number of elements/instructions in the instruction table
- * @param tokens
- * @param stateTransition
- * @param step
+ * @param tokens            Tokens output after lexical analysis
+ * @param stateTransition   Array of state transistions (see pTransitions)
+ * @param step              Number of lexemes in the token
  * @param line              Line where the instruction was encountered
  * @param startAddr         Starting address of the code (defined using ORIG)
  * @return void
  */
 void insertInstruction(instruction ** instructionTable, int * tableCount, char ** * tokens, enum pFSM * stateTransition, int step, int line, char * startAddr) {
 
-    {
-        ( * instructionTable) = realloc( * instructionTable, ( * tableCount + 1) * sizeof(struct instruction));
-        ( * instructionTable)[ * tableCount].label = NULL;
-        ( * instructionTable)[ * tableCount].directive = NULL;
-        ( * instructionTable)[ * tableCount].opcode = NULL;
-        ( * instructionTable)[ * tableCount].operands = NULL;
-        ( * instructionTable)[ * tableCount].encoding = NULL;
-        ( * instructionTable)[ * tableCount].opCount = 0;
+    /* Increase memory allocation to insert new instruction
+     * No checking necessary since every instruction has to be processed */
+    ( * instructionTable) = realloc( * instructionTable, ( * tableCount + 1) * sizeof(struct instruction));
+    ( * instructionTable)[ * tableCount].label = NULL;
+    ( * instructionTable)[ * tableCount].directive = NULL;
+    ( * instructionTable)[ * tableCount].opcode = NULL;
+    ( * instructionTable)[ * tableCount].operands = NULL;
+    ( * instructionTable)[ * tableCount].encoding = NULL;
+    ( * instructionTable)[ * tableCount].opCount = 0;
 
-        int labelIndex = firstInstanceofLabel(stateTransition, step);
-        int directiveIndex = firstInstanceofDirective(stateTransition, step);
-        int opcodeIndex = firstInstanceofOpcode(stateTransition, step);
-        int operandIndex = firstInstanceofOperands(stateTransition, step);
+    /* Find beginning indices of lexemes in tokens */
+    int labelIndex = firstInstanceofLabel(stateTransition, step);
+    int directiveIndex = firstInstanceofDirective(stateTransition, step);
+    int opcodeIndex = firstInstanceofOpcode(stateTransition, step);
+    int operandIndex = firstInstanceofOperands(stateTransition, step);
 
-        if (labelIndex == 0) {
-            ( * instructionTable)[ * tableCount].label = malloc(strlen(( * tokens)[0]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (size_t)(strlen(( * tokens)[0]) + 1));
-        }
-
-        if (directiveIndex < step) {
-            ( * instructionTable)[ * tableCount].directive = malloc(strlen(( * tokens)[directiveIndex]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (size_t)(strlen(( * tokens)[directiveIndex]) + 1));
-        }
-
-        if (opcodeIndex < step) {
-            ( * instructionTable)[ * tableCount].opcode = malloc(strlen(( * tokens)[opcodeIndex]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (size_t)(strlen(( * tokens)[opcodeIndex]) + 1));
-        }
-
-        if (operandIndex < step) {
-            ( * instructionTable)[ * tableCount].operands = malloc((step - operandIndex) * sizeof(char ** ));
-
-            for (int j = operandIndex; j < step; j++) {
-                ( * instructionTable)[ * tableCount].operands[j - operandIndex] = malloc(strlen(( * tokens)[j]) + 1);
-                strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (size_t)(strlen(( * tokens)[j]) + 1));
-            }
-            ( * instructionTable)[ * tableCount].opCount = step - operandIndex;
-        }
-
-        if (startAddr != NULL) {
-            ( * instructionTable)[ * tableCount].addr = dec2dec2(startAddr) + line * 2;
-        }
-
-        * tableCount = * tableCount + 1;
+    /* Copy label lexeme if it exists into instruction table
+     * 1. Label here refers to definition and not reference
+     * 2. Label references are stored as operands
+     *
+     *      inst1-> START ADD R1, R1, #-1
+     *      inst2-> BR START
+     *
+     * Label START in inst1 is a definition and hence will be stored as label in instruction table
+     * Label START in inst2 is an operand/reference and hence will be stored as operands in instruction table
+     */
+    if (labelIndex == 0) {
+        ( * instructionTable)[ * tableCount].label = malloc(strlen(( * tokens)[0]) + 1);
+        strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (size_t)(strlen(( * tokens)[0]) + 1));
     }
+
+    /* Copy directive lexeme if it exists into instruction table */
+    if (directiveIndex < step) {
+        ( * instructionTable)[ * tableCount].directive = malloc(strlen(( * tokens)[directiveIndex]) + 1);
+        strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (size_t)(strlen(( * tokens)[directiveIndex]) + 1));
+    }
+
+    /* Copy opcode lexeme if it exists into instruction table */
+    if (opcodeIndex < step) {
+        ( * instructionTable)[ * tableCount].opcode = malloc(strlen(( * tokens)[opcodeIndex]) + 1);
+        strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (size_t)(strlen(( * tokens)[opcodeIndex]) + 1));
+    }
+
+    /* Copy operand lexemes if it exists into instruction table */
+    if (operandIndex < step) {
+        ( * instructionTable)[ * tableCount].operands = malloc((step - operandIndex) * sizeof(char ** ));
+
+        for (int j = operandIndex; j < step; j++) {
+            ( * instructionTable)[ * tableCount].operands[j - operandIndex] = malloc(strlen(( * tokens)[j]) + 1);
+            strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (size_t)(strlen(( * tokens)[j]) + 1));
+        }
+        ( * instructionTable)[ * tableCount].opCount = step - operandIndex;
+    }
+
+    /* Copy instruction address into instruction table */
+    if (startAddr != NULL) {
+        ( * instructionTable)[ * tableCount].addr = dec2dec2(startAddr) + line * 2;
+    }
+    * tableCount = * tableCount + 1;
 }
 
 /** +
  * @fn enum errorCode encodeORIG(instruction*, symbol*, int)
- * @brief Encode the ORIG instruction
+ * @brief Encode the ORIG directive
  *
  * @param instruct
  * @param symbol
@@ -642,7 +672,7 @@ enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeFILL(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the FILL directive
  *
  * @param instruct
  * @param symbol
@@ -674,7 +704,7 @@ enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeEND(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the END directive
  *
  * @param instruct
  * @param symbol
@@ -687,7 +717,7 @@ enum errorCode encodeEND(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeNOP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the NOP instruction
  *
  * @param instruct
  * @param symbol
@@ -708,7 +738,7 @@ enum errorCode encodeNOP(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeTRAP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the TRAP instruction
  *
  * @param instruct
  * @param symbol
@@ -739,7 +769,7 @@ enum errorCode encodeTRAP(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeHALT(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the HALT instruction
  *
  * @param instruct
  * @param symbol
@@ -762,7 +792,7 @@ enum errorCode encodeHALT(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeADD(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the ADD instruction
  *
  * @param instruct
  * @param symbol
@@ -809,7 +839,7 @@ enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeXOR(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the XOR instruction
  *
  * @param instruct
  * @param symbol
@@ -855,7 +885,7 @@ enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeAND(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the AND instruction
  *
  * @param instruct
  * @param symbol
@@ -903,7 +933,7 @@ enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeJMP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the JMP instruction
  *
  * @param instruct
  * @param symbol
@@ -931,7 +961,7 @@ enum errorCode encodeJMP(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeRET(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the RET instruction
  *
  * @param instruct
  * @param symbol
@@ -955,7 +985,7 @@ enum errorCode encodeRET(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeJSR(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the JSR instruction
  *
  * @param instruct
  * @param sym
@@ -991,7 +1021,7 @@ enum errorCode encodeJSR(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBR(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BR instruction
  *
  * @param instruct
  * @param sym
@@ -1028,7 +1058,7 @@ enum errorCode encodeBR(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRN(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRN instruction
  *
  * @param instruct
  * @param sym
@@ -1065,7 +1095,7 @@ enum errorCode encodeBRN(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRZ(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRZ instruction
  *
  * @param instruct
  * @param sym
@@ -1102,7 +1132,7 @@ enum errorCode encodeBRZ(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRP instruction
  *
  * @param instruct
  * @param sym
@@ -1139,7 +1169,7 @@ enum errorCode encodeBRP(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRNZ(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRNZ instruction
  *
  * @param instruct
  * @param sym
@@ -1176,7 +1206,7 @@ enum errorCode encodeBRNZ(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRNP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRNP instruction
  *
  * @param instruct
  * @param sym
@@ -1213,7 +1243,7 @@ enum errorCode encodeBRNP(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRZP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRZP instruction
  *
  * @param instruct
  * @param sym
@@ -1250,7 +1280,7 @@ enum errorCode encodeBRZP(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeBRNZP(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the BRNZP instruction
  *
  * @param instruct
  * @param sym
@@ -1287,7 +1317,7 @@ enum errorCode encodeBRNZP(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeJSRR(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the JSRR instruction
  *
  * @param instruct
  * @param symbol
@@ -1315,7 +1345,7 @@ enum errorCode encodeJSRR(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeLDB(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the LDB instruction
  *
  * @param instruct
  * @param symbol
@@ -1355,7 +1385,7 @@ enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeLDW(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the LDW instruction
  *
  * @param instruct
  * @param symbol
@@ -1395,7 +1425,7 @@ enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeLEA(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the LEA instruction
  *
  * @param instruct
  * @param sym
@@ -1435,7 +1465,7 @@ enum errorCode encodeLEA(instruction * instruct, symbol * sym, int count) {
 
 /** +
  * @fn enum errorCode encodeNOT(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the NOT instruction
  *
  * @param instruct
  * @param symbol
@@ -1466,7 +1496,7 @@ enum errorCode encodeNOT(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeRTI(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the RIT instruction
  *
  * @param instruct
  * @param symbol
@@ -1490,7 +1520,7 @@ enum errorCode encodeRTI(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeLSHF(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the SHF instruction
  *
  * @param instruct
  * @param symbol
@@ -1533,7 +1563,7 @@ enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeRSHFL(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the RSHFL instruction
  *
  * @param instruct
  * @param symbol
@@ -1576,7 +1606,7 @@ enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeRSHFA(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the RSHFA instruction
  *
  * @param instruct
  * @param symbol
@@ -1619,7 +1649,7 @@ enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeSTB(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the STB instruction
  *
  * @param instruct
  * @param symbol
@@ -1660,7 +1690,7 @@ enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn enum errorCode encodeSTW(instruction*, symbol*, int)
- * @brief
+ * @brief Encode the STW instruction
  *
  * @param instruct
  * @param symbol
@@ -1702,7 +1732,7 @@ enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
 
 /** +
  * @fn void freeLexemes(char***, int*)
- * @brief
+ * @brief Free memory allocated to store lexemes
  *
  * @param lexemes
  * @param len
@@ -1718,7 +1748,7 @@ void freeLexemes(char ** * lexemes, int * len) {
 
 /** +
  * @fn void freeSymbolTable(symbol**, int*)
- * @brief
+ * @brief Free the symbol table
  *
  * @param symbolTable
  * @param tableCount
@@ -1735,7 +1765,7 @@ void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
 
 /** +
  * @fn void freeInstructionTable(instruction**, int*)
- * @brief
+ * @brief Free the instruction table
  *
  * @param instructionTable
  * @param tableCount
@@ -1760,7 +1790,7 @@ void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
 
 /** +
  * @fn void lexer(char*, char***, int*)
- * @brief
+ * @brief Lex the line extracted from the input <*.asm> file into tokens
  *
  * @param line
  * @param tokens
@@ -1814,7 +1844,7 @@ void lexer(char * line, char ** * tokens, int * len) {
 
 /** +
  * @fn int hex2dec(char*)
- * @brief
+ * @brief Convert hex string into Base10 number
  *
  * @param str
  * @return int
@@ -1843,7 +1873,7 @@ int hex2dec(char * str) {
 
 /** +
  * @fn char dec2hex*(int)
- * @brief
+ * @brief Convert a Base10 number into hex string
  *
  * @param dec
  * @return char*
@@ -1876,7 +1906,7 @@ void prepend(char ** str, char * p) {
 
 /** +
  * @fn char bin2hex*(char*)
- * @brief
+ * @brief Convert Base2 string into hex string
  *
  * @param dec
  * @return char*
@@ -1890,7 +1920,7 @@ char * bin2hex(char * dec) {
 
 /** +
  * @fn char dec2bin*(int)
- * @brief
+ * @brief Convert Base10 number into Base2 string
  *
  * @param dec
  * @return char*
@@ -1910,7 +1940,7 @@ char * dec2bin(int dec) {
 
 /** +
  * @fn char dec2dec*(int)
- * @brief
+ * @brief Convert Base10 number into Base10 string
  *
  * @param dec
  * @return char*
@@ -1923,7 +1953,7 @@ char * dec2dec(int dec) {
 
 /** +
  * @fn int dec2dec2(char*)
- * @brief
+ * @brief Convert Base10 string into Base10 number
  *
  * @param dec
  * @return int
@@ -1952,7 +1982,7 @@ char * int2str(int dec) {
 
 /** +
  * @fn bool isValidHex(char*)
- * @brief
+ * @brief CHeck if Base16/hex string is a valid Base16 number
  *
  * @param str
  * @return bool
@@ -1973,7 +2003,7 @@ bool isValidHex(char * str) {
 
 /** +
  * @fn bool isValidDec(char*)
- * @brief
+ * @brief Check if a Base10 string is a valid Base10 number
  *
  * @param str
  * @return bool
@@ -2001,7 +2031,7 @@ bool isValidDec(char * str) {
 
 /** +
  * @fn enum pFSM checkLabel(char*)
- * @brief
+ * @brief Check if Label defined is valid
  *
  * @param str
  * @return pFSM
@@ -2028,7 +2058,7 @@ enum pFSM checkLabel(char * str) {
 
 /** +
  * @fn enum pFSM checkpOP(char*)
- * @brief
+ * @brief Check if directive is valid
  *
  * @param str
  * @return pFSM
@@ -2049,7 +2079,7 @@ enum pFSM checkpOP(char * str) {
 
 /** +
  * @fn enum pFSM checkInst(char*)
- * @brief
+ * @brief Check if opcode used exists in ISA
  *
  * @param str
  * @return pFSM
@@ -2072,7 +2102,7 @@ enum pFSM checkInst(char * str) {
 
 /** +
  * @fn enum pFSM checkRegister(char*)
- * @brief
+ * @brief CHeck if registers used are allowed
  *
  * @param str
  * @return pFSM
@@ -2095,7 +2125,7 @@ enum pFSM checkRegister(char * str) {
 
 /** +
  * @fn enum pFSM checkImmidiate(char**)
- * @brief
+ * @brief Check if immediate values used are valid
  *
  * @param str
  * @return pFSM
