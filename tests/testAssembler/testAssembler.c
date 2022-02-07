@@ -15,14 +15,61 @@
 #include <limits.h>
 #include "../../src/Lc3b-Assembler.h"
 
+/** +
+ * @def PROG0_ASM_LINES_
+ * @brief Number of lines in prog.hex
+ *
+ */
 #define PROG0_ASM_LINES_ 13
+
+/** +
+ * @def PROG1_ASM_LINES_
+ * @brief Number of lines in prog1.hex
+ *
+ */
 #define PROG1_ASM_LINES_ 2
+
+/** +
+ * @def PROG2_ASM_LINES_
+ * @brief Number of lines in prog2.hex
+ *
+ */
 #define PROG2_ASM_LINES_ 9
+
+/** +
+ * @def PROG3_ASM_LINES_
+ * @brief Number of lines in prog3.hex
+ *
+ */
 #define PROG3_ASM_LINES_ 8
+
+/** +
+ * @def PROG6_ASM_LINES_
+ * @brief Number of lines in prog6.hex
+ *
+ */
 #define PROG6_ASM_LINES_ 1
+
+/** +
+ * @def PROG9_ASM_LINES_
+ * @brief Number of lines in prog9.hex
+ *
+ */
 #define PROG9_ASM_LINES_ 21
+
+/** +
+ * @def SHUFFLE_ASM_LINES_
+ * @brief Number of lines in shuffle.hex
+ *
+ */
 #define SHUFFLE_ASM_LINES_ 12
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog.asm
+ *
+ * @param testAssembler_prog0_
+ */
 START_TEST (testAssembler_prog0_)
 {
     FILE *in, *out;
@@ -97,7 +144,12 @@ START_TEST (testAssembler_prog0_)
 }
 END_TEST
 
-
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog1.asm
+ *
+ * @param testAssembler_prog1_
+ */
 START_TEST (testAssembler_prog1_)
 {
     FILE *in, *out;
@@ -150,6 +202,12 @@ START_TEST (testAssembler_prog1_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog2.asm
+ *
+ * @param testAssembler_prog2_
+ */
 START_TEST (testAssembler_prog2_)
 {
     FILE *in, *out;
@@ -217,6 +275,12 @@ START_TEST (testAssembler_prog2_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog3.asm
+ *
+ * @param testAssembler_prog3_
+ */
 START_TEST (testAssembler_prog3_)
 {
     FILE *in, *out;
@@ -282,6 +346,12 @@ START_TEST (testAssembler_prog3_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog4.asm
+ *
+ * @param testAssembler_prog4_
+ */
 START_TEST (testAssembler_prog4_)
 {
     FILE *in, *out;
@@ -303,6 +373,12 @@ START_TEST (testAssembler_prog4_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog6.asm
+ *
+ * @param testAssembler_prog6_
+ */
 START_TEST (testAssembler_prog6_)
 {
     FILE *in, *out;
@@ -354,6 +430,12 @@ START_TEST (testAssembler_prog6_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog7.asm
+ *
+ * @param testAssembler_prog7_
+ */
 START_TEST (testAssembler_prog7_)
 {
     FILE *in, *out;
@@ -375,6 +457,12 @@ START_TEST (testAssembler_prog7_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for prog9.asm
+ *
+ * @param testAssembler_prog9_
+ */
 START_TEST (testAssembler_prog9_)
 {
     FILE *in, *out;
@@ -466,6 +554,12 @@ START_TEST (testAssembler_prog9_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for shuffle.asm
+ *
+ * @param testAssembler_shuffle_
+ */
 START_TEST (testAssembler_shuffle_)
 {
     FILE *in, *out;
@@ -539,9 +633,18 @@ START_TEST (testAssembler_shuffle_)
 }
 END_TEST
 
+/** +
+ * @fn int main(void)
+ * @brief main method to initialize and create test suite
+ *
+ * @return int exit code
+ */
 int main(void)
 {
+    /* Create test suite for testing the assembler */
     Suite *s1 = suite_create("Test Assembler");
+
+    /* Create test cases to add to test suite */
     TCase *tc1_0 = tcase_create("Prog0");
     TCase *tc1_1 = tcase_create("Prog1");
     TCase *tc1_2 = tcase_create("Prog2");
@@ -551,9 +654,14 @@ int main(void)
     TCase *tc1_7 = tcase_create("Prog7");
     TCase *tc1_9 = tcase_create("Prog9");
     TCase *tc1_shuffle = tcase_create("Shuffle");
+
+    /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
+
+    /* Number of pass-fails*/
     int nf;
 
+    /* Add test cases to test suite */
     suite_add_tcase(s1, tc1_0);
     suite_add_tcase(s1, tc1_1);
     suite_add_tcase(s1, tc1_2);
@@ -564,6 +672,7 @@ int main(void)
     suite_add_tcase(s1, tc1_9);
     suite_add_tcase(s1, tc1_shuffle);
 
+    /* Add test methods to test cases */
     tcase_add_test(tc1_0, testAssembler_prog0_);
     tcase_add_test(tc1_1, testAssembler_prog1_);
     tcase_add_test(tc1_2, testAssembler_prog2_);
@@ -574,10 +683,16 @@ int main(void)
     tcase_add_test(tc1_9, testAssembler_prog9_);
     tcase_add_test(tc1_shuffle, testAssembler_shuffle_);
     
+    /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
+
+    /* Get number of pass-fails */
     nf = srunner_ntests_failed(sr);
+
+    /* Free memory allocated to test suite */
     srunner_free(sr);
 
+    /* Exit with code 0 if all tests passed*/
     return nf == 0 ? 0 : 1;
 }
 
