@@ -39,4 +39,4 @@ the assembly language to machine code.
 
 7. <h4>Running:</h4>
 
-    To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute `./Lc3BAssembler <*.asm> <*.hex>`
+    To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute:<br> `./Lc3BAssembler <*.asm> <*.hex>`

@@ -182,7 +182,7 @@ START_TEST (testEncoding_FILL_INCORRECT_LESS_THAN_0_)
     /* Encode fill instruct */
     error = encodeFILL(&fill, NULL, 0);
 
-    /* Assert exit code as INVALID_CONSTANT
+    /* Assert exit code as OTHER_ERROR
      * Exit code not 0 since address is invalid (<0)
      */
     ck_assert(error == OTHER_ERROR);
@@ -213,7 +213,7 @@ START_TEST (testEncoding_FILL_INCORRECT_GREATER_THAN_65535_)
     /* Encode fill instruct */
     error = encodeFILL(&fill, NULL, 0);
 
-    /* Assert exit code as INVALID_CONSTANT
+    /* Assert exit code as OTHER_ERROR
      * Exit code not 0 since address is invalid (>65535)
      */
     ck_assert(error == OTHER_ERROR);
@@ -281,6 +281,32 @@ START_TEST (testEncoding_FILL_INCORRECT_OPERAND_GREATER_THAN_65535_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for END instruction
+ *
+ * @param testEncoding_END_CORRECT__
+ */
+START_TEST (testEncoding_END_CORRECT_)
+{
+    instruction end;
+    enum errorCode error;
+
+    /* Intialize struct instruct */
+    end.label = NULL;
+    end.directive = "END";
+    end.opcode = NULL;
+    end.operands = NULL;
+    end.addr = 12288;//0x3000
+    end.opCount = 1;
+
+    /* Encode end instruct */
+    error = encodeEND(&end, NULL, 0);
+
+    /* Assert exit code as OK_VALID */
+    ck_assert(error == OK_VALID);
+}
+END_TEST
 
 /** +
  * @fn int main(void)
@@ -304,7 +330,9 @@ int main(void)
     TCase *tc1_6 = tcase_create("FILL INCORRECT ADDRESS GREATER THAN 65535");
     TCase *tc1_7 = tcase_create("FILL INCORRECT OPERAND LESS THAN -32768");
     TCase *tc1_8 = tcase_create("FILL INCORRECT OPERAND GREATER THAN 65535");
-    
+
+    TCase *tc1_9 = tcase_create("END CORRECT");
+
     /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
 
@@ -323,6 +351,8 @@ int main(void)
     suite_add_tcase(s1, tc1_7);
     suite_add_tcase(s1, tc1_8);
 
+    suite_add_tcase(s1, tc1_9);
+    
     /* Add test methods to test cases */
     tcase_add_test(tc1_0, testEncoding_ORIG_CORRECT_);
     tcase_add_test(tc1_1, testEncoding_ORIG_INCORRECT_LESS_THAN_0_);
@@ -334,7 +364,9 @@ int main(void)
     tcase_add_test(tc1_6, testEncoding_FILL_INCORRECT_GREATER_THAN_65535_);
     tcase_add_test(tc1_7, testEncoding_FILL_INCORRECT_OPERAND_LESS_THAN_NEG32768_);
     tcase_add_test(tc1_8, testEncoding_FILL_INCORRECT_OPERAND_GREATER_THAN_65535_);
-    
+
+    tcase_add_test(tc1_9, testEncoding_END_CORRECT_);
+       
     /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
 
