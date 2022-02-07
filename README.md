@@ -3,7 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/1sand0s/Lc3B-Assembler)
 
 <h2> What is it ?</h2>
-A standalone assembler for the [Lc3B ISA](https://courses.engr.illinois.edu/ece411/fa2019/mp/LC3b_ISA.pdf) ISA written from scratch in C without any 
+A standalone assembler for the [Lc3B ISA](https://courses.engr.illinois.edu/ece411/fa2019/mp/LC3b_ISA.pdf) written from scratch in C without any 
 external libraries besides std Clibs. The computer can only process 1's and 0's or machine code and therefore any program instructing 
 the computer to perform a certain task must be in machine code. However, writing programs in machine code is extremely difficult. This 
 difficulty is overcome by introducing higher level programming languages which abstract away the complexity of coding directly in machine code. 
@@ -19,7 +19,7 @@ the assembly language to machine code.
 
 2. <h4>Clone the Lc3B-Assembler repository:</h4>
 
-    If you installed Git, execute the following command:<br> `git clone https://github.com/1sand0s/Lc3B-Assembler.git`<br>
+    If you installed Git, execute the following command:<br> `git clone https://github.com/1sand0s/Lc3B-Assembler.git`<br><br>
     Otherwise, download the repository as a [zip ball](https://github.com/1sand0s/Lc3B-Assembler/archive/refs/heads/main.zip)
 
 6. <h4>Building and Running Tests:</h4>
