@@ -6,7 +6,7 @@
 A standalone assembler for the [Lc3B ISA](https://courses.engr.illinois.edu/ece411/fa2019/mp/LC3b_ISA.pdf) written from scratch in C without any 
 external libraries besides std Clibs. 
 
-The computer can only process 1's and 0's or machine code and therefore any program instructing 
+<br>The computer can only process 1's and 0's or machine code and therefore any program instructing 
 the computer to perform a certain task must be in machine code. However, writing programs in machine code is extremely difficult. This 
 difficulty is overcome by introducing higher level programming languages which abstract away the complexity of coding directly in machine code. 
 Assembly language is one such higher(relative to machine code) level of abstraction. However, since the computer can only understand machine code, 
