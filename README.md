@@ -2,10 +2,16 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/1sand0s/Lc3B-Assembler/Makefile%20CI)
 ![GitHub](https://img.shields.io/github/license/1sand0s/Lc3B-Assembler)
 
-Assembler for the LC3b ISA
+<h2> What is it ?</h2>
+A standalone assembler for the [Lc3B ISA](https://en.wikipedia.org/wiki/Little_Computer_3) written from scratch in C without any 
+external libraries besides std Clibs. The computer can only process 1's and 0's or machine code and therefore any program instructing 
+the computer to perform a certain task must be in machine code. However, writing programs in machine code is extremely difficult. This 
+difficulty is overcome by introducing higher level programming languages which abstract away the complexity of coding directly in machine code. 
+Assembly language is one such higher(relative to machine code) level of abstraction. However, since the computer can only understand machine code, 
+programs written in these higher level languages must be transformed into machine code. An assembler is a tool that transforms programs written in 
+the assembly language to machine code. 
 
-<h2>How to build</h2>
-
+<h2>Setup</h2>
 
 1. <h4>Install Git:</h4>
 
@@ -13,17 +19,22 @@ Assembler for the LC3b ISA
 
 2. <h4>Clone the Lc3B-Assembler repository:</h4>
 
-    If you installed Git, execute the following command: `https://github.com/1sand0s/Lc3B-Assembler.git`<br>
+    If you installed Git, execute the following command: `git clone https://github.com/1sand0s/Lc3B-Assembler.git`<br>
     Otherwise, download the repository as a [zip ball](https://github.com/1sand0s/Lc3B-Assembler/archive/refs/heads/main.zip)
 
-6. <h4>Building Lc3B-Assembler:</h4>
+6. <h4>Building and Running Tests:</h4>
 
     Open a command prompt/terminal, `cd` to the directory `Lc3B-Assembler`, and execute
     ```
     ./configure LIBS=-lm
-    make install
+    make 
+    make check
+    sudo make install
     ```
+
+    The `configure` script might complain about [check](https://libcheck.github.io/check/) package not being present. `check` is the test runner used for 
+    unit-testing. You can install `check` as follows `sudo apt-get install check` or build it from source by following these [instructions](https://github.com/libcheck/check)
 
 7. <h4>Running:</h4>
 
-    To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute `./a.out <*.asm> <*.hex>`
+    To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute `./Lc3BAssembler <*.asm> <*.hex>`

@@ -22,25 +22,28 @@ START_TEST (testAssembler)
     char *line = NULL;
     size_t len = 0;
     char **actual;
-    int actual_count=0;
+    int actual_count = 0;
 
     /* Expected translation */
-    char *expected[]={"0x1000\n",
-                      "0x1260\n"};
+    char *expected[] = {"0x1000\n",
+                        "0x1260\n"};
 
     /* Open/create files for reading ASM code and writing HEX code */
     in = fopen("testCases/prog1.asm", "r");
-    out = fopen("prog1.hex", "w");
+
+    /* Opening <*.hex> in writing and reading mode for rewinding later */
+    out = fopen("prog1.hex", "w+");
 
     /* Assemble the ASM file and write HEX to out file */
     error = assemble(in, out);
     fclose(in);
-    fclose(out);
     
-    out = fopen("prog1.hex", "r");
-    //rewind(out);
+    /* Rewind <*.hex> file back to start to extract lines */
+    rewind(out);
     
-    /* Extract contents of HEX file line by line */
+    /* Extract contents of HEX file line by line 
+     * And store in char **actual
+     */
     while(getline( & line, & len, out) != -1){
         if(actual_count == 0)
             actual = malloc(sizeof(char*));
@@ -54,13 +57,13 @@ START_TEST (testAssembler)
     fclose(out);
 
     /* Free buffer used to store lines of the generated  <*.hex> file */
-    //free(line);
-    printf("Hello World\n");
+    free(line);
+
     /* Assert if contents of expected and actual match */
     ck_assert(error == OK_VALID);
-    ck_assert_int_eq(actual_count,2);
-    ck_assert_str_eq(expected[0],actual[0]);
-    ck_assert_str_eq(expected[1],actual[1]);
+    ck_assert_int_eq(actual_count, 2);
+    ck_assert_str_eq(expected[0], actual[0]);
+    ck_assert_str_eq(expected[1], actual[1]);
 }
 END_TEST
 
