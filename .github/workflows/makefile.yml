@@ -13,9 +13,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: autoreconf -i -v
     
     - name: configure
       run: ./configure LIBS=-lm
+
+    - name: Build Package
+      run: make
       
-    - name: Install dependencies
+    - name: Check Tests
+      run: make check
+
+    - name: Install Package
       run: make install
+
+    - name: Clean
+      run: make clean
