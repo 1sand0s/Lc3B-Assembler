@@ -13162,7 +13162,7 @@ fi
 ac_config_headers="$ac_config_headers config.h"
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile tests/testAssembler/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile tests/testAssembler/Makefile tests/testEncoding/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -14179,6 +14179,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "tests/testAssembler/Makefile") CONFIG_FILES="$CONFIG_FILES tests/testAssembler/Makefile" ;;
+    "tests/testEncoding/Makefile") CONFIG_FILES="$CONFIG_FILES tests/testEncoding/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
