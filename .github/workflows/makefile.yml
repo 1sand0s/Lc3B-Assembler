@@ -18,7 +18,7 @@ jobs:
       run: autoreconf -i -v
 
     - name: Install testrunner check
-      run: apt-get install check
+      run: sudo apt-get install check
     
     - name: configure
       run: ./configure LIBS=-lm
