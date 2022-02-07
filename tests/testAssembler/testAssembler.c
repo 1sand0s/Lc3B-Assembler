@@ -141,6 +141,13 @@ START_TEST (testAssembler_prog0_)
     ck_assert_str_eq(expected[10], actual[10]);
     ck_assert_str_eq(expected[11], actual[11]);
     ck_assert_str_eq(expected[12], actual[12]);
+
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
@@ -199,6 +206,13 @@ START_TEST (testAssembler_prog1_)
     ck_assert_int_eq(actual_count, PROG1_ASM_LINES_);
     ck_assert_str_eq(expected[0], actual[0]);
     ck_assert_str_eq(expected[1], actual[1]);
+    
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
@@ -272,6 +286,13 @@ START_TEST (testAssembler_prog2_)
     ck_assert_str_eq(expected[6], actual[6]);
     ck_assert_str_eq(expected[7], actual[7]);
     ck_assert_str_eq(expected[8], actual[8]);
+
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
@@ -343,6 +364,13 @@ START_TEST (testAssembler_prog3_)
     ck_assert_str_eq(expected[5], actual[5]);
     ck_assert_str_eq(expected[6], actual[6]);
     ck_assert_str_eq(expected[7], actual[7]);
+    
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
@@ -427,6 +455,13 @@ START_TEST (testAssembler_prog6_)
     ck_assert(error == OK_VALID);
     ck_assert_int_eq(actual_count, PROG6_ASM_LINES_);
     ck_assert_str_eq(expected, actual[0]);
+    
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
@@ -551,6 +586,13 @@ START_TEST (testAssembler_prog9_)
     ck_assert_str_eq(expected[18], actual[18]);
     ck_assert_str_eq(expected[19], actual[19]);
     ck_assert_str_eq(expected[20], actual[20]);
+    
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
@@ -630,6 +672,13 @@ START_TEST (testAssembler_shuffle_)
     ck_assert_str_eq(expected[9], actual[9]);
     ck_assert_str_eq(expected[10], actual[10]);
     ck_assert_str_eq(expected[11], actual[11]);
+    
+    /* Free memory for char* contained within actual */
+    for(int j = 0; j < actual_count; j++)
+      free(actual[j]);
+
+    /* Free memory of char** */
+    free(actual);
 }
 END_TEST
 
