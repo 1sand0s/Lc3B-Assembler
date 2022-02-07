@@ -30,7 +30,7 @@ jobs:
       run: make check
 
     - name: Install Package
-      run: make install
+      run: sudo make install
 
     - name: Clean
       run: make clean
