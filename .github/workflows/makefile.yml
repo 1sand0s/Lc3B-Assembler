@@ -16,6 +16,9 @@ jobs:
 
     - name: Install dependencies
       run: autoreconf -i -v
+
+    - name: Install testrunner check
+      run: apt-get install check
     
     - name: configure
       run: ./configure LIBS=-lm
