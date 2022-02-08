@@ -423,6 +423,68 @@ START_TEST (testEncoding_TRAP_CORRECT_)
 END_TEST
 
 /** +
+ * @fn  START_TEST()
+ * @brief Test case for TRAP instruction
+ *
+ * @param testEncoding_TRAP_INCORRECT_OPERAND_LESS_THAN_0_
+ */
+START_TEST (testEncoding_TRAP_INCORRECT_OPERAND_LESS_THAN_0_)
+{
+    instruction trap;
+    enum errorCode error;
+    char* operands[]={"#-1"};
+
+    /* Initialize struct instruct */
+    trap.label = NULL;
+    trap.directive = "TRAP";
+    trap.opcode = NULL;
+    trap.operands = operands; //Operand less than -32768
+    trap.addr = 12288; //0x3000
+    trap.opCount = 1;
+
+    /* Encode trap instruct */
+    error = encodeTRAP(&trap, NULL, 0);
+   
+    /* Assert exit code as INVALID_CONSTANT
+     * Exit code not 0 since operand is invalid (<0)
+     */
+    ck_assert(error == INVALID_CONSTANT);
+}
+END_TEST
+
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for TRAP instruction
+ *
+ * @param testEncoding_TRAP_INCORRECT_OPERAND_GREATER_THAN_255_
+ */
+START_TEST (testEncoding_TRAP_INCORRECT_OPERAND_GREATER_THAN_255_)
+{
+    instruction trap;
+    enum errorCode error;
+    char* operands[]={"#256"};
+
+    /* Initialize struct instruct */
+    trap.label = NULL;
+    trap.directive = "TRAP";
+    trap.opcode = NULL;
+    trap.operands = operands; //operand greater than 65535
+    trap.addr = 12288;//0x3000
+    trap.opCount = 1;
+
+    /* Encode fill instruct */
+    error = encodeTRAP(&trap, NULL, 0);
+
+    /* Assert exit code as INVALID_CONSTANT
+     * Exit code not 0 since operand is invalid (>255)
+     */
+    ck_assert(error == INVALID_CONSTANT);
+}
+END_TEST
+
+
+/** +
  * @fn int main(void)
  * @brief main method to initialize and create test suite
  *
@@ -452,6 +514,8 @@ int main(void)
     TCase *tc1_12 = tcase_create("NOP INCORRECT ADDRESS GREATER THAN 65535");
     
     TCase *tc1_13 = tcase_create("TRAP CORRECT");
+    TCase *tc1_14 = tcase_create("TRAP INCORRECT OPERAND LESS THAN 0");
+    TCase *tc1_15 = tcase_create("TRAP INCORRECT OPERAND GREATER THAN 255");
     
     /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
@@ -478,6 +542,8 @@ int main(void)
     suite_add_tcase(s1, tc1_12);
     
     suite_add_tcase(s1, tc1_13);
+    suite_add_tcase(s1, tc1_14);
+    suite_add_tcase(s1, tc1_15);
     
     /* Add test methods to test cases */
     tcase_add_test(tc1_0, testEncoding_ORIG_CORRECT_);
@@ -498,7 +564,8 @@ int main(void)
     tcase_add_test(tc1_12, testEncoding_NOP_INCORRECT_GREATER_THAN_65535_);
 
     tcase_add_test(tc1_13, testEncoding_TRAP_CORRECT_);
-    
+    tcase_add_test(tc1_14, testEncoding_TRAP_INCORRECT_OPERAND_LESS_THAN_0_);
+    tcase_add_test(tc1_15, testEncoding_TRAP_INCORRECT_OPERAND_GREATER_THAN_255_);   
     /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
 
