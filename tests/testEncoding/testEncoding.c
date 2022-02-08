@@ -309,6 +309,120 @@ START_TEST (testEncoding_END_CORRECT_)
 END_TEST
 
 /** +
+ * @fn  START_TEST()
+ * @brief Test case for NOP instruction
+ *
+ * @param testEncoding_NOP_CORRECT__
+ */
+START_TEST (testEncoding_NOP_CORRECT_)
+{
+    instruction nop;
+    enum errorCode error;
+
+    /* Intialize struct instruct */
+    nop.label = NULL;
+    nop.directive = "END";
+    nop.opcode = NULL;
+    nop.operands = NULL;
+    nop.addr = 12288;//0x3000
+    nop.opCount = 1;
+
+    /* Encode nop instruct */
+    error = encodeNOP(&nop, NULL, 0);
+
+    /* Assert exit code as OK_VALID */
+    ck_assert(error == OK_VALID);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for NOP instruction
+ *
+ * @param testEncoding_NOP_INCORRECT_LESS_THAN_0_
+ */
+START_TEST (testEncoding_NOP_INCORRECT_LESS_THAN_0_)
+{
+    instruction nop;
+    enum errorCode error;
+
+    /* Initialize struct instruct */
+    nop.label = NULL;
+    nop.directive = "NOP";
+    nop.opcode = NULL;
+    nop.operands = NULL;
+    nop.addr = -1;//Negative address
+    nop.opCount = 1;
+
+    /* Encode nop instruct */
+    error = encodeNOP(&nop, NULL, 0);
+
+    /* Assert exit code as INVALID_CONSTANT
+     * Exit code not 0 since address is invalid (<0)
+     */
+    ck_assert(error == OTHER_ERROR);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for NOP instruction
+ *
+ * @param testEncoding_NOP_INCORRECT_GREATER_THAN_65535_
+ */
+START_TEST (testEncoding_NOP_INCORRECT_GREATER_THAN_65535_)
+{
+    instruction nop;
+    enum errorCode error;
+
+    /* Initialize struct instruct */
+    nop.label = NULL;
+    nop.directive = "NOP";
+    nop.opcode = NULL;
+    nop.operands = NULL;
+    nop.addr = 65536;//Address greater than 65535
+    nop.opCount = 1;
+
+    /* Encode nop instruct */
+    error = encodeNOP(&nop, NULL, 0);
+
+    /* Assert exit code as INVALID_CONSTANT
+     * Exit code not 0 since address is invalid (>65535)
+     */
+    ck_assert(error == OTHER_ERROR);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for TRAP instruction
+ *
+ * @param testEncoding_TRAP_CORRECT__
+ */
+START_TEST (testEncoding_TRAP_CORRECT_)
+{
+    instruction trap;
+    enum errorCode error;
+    char* operands[]={"#15"}; //0x0F
+
+    /* Intialize struct instruct */
+    trap.label = NULL;
+    trap.directive = "TRAP";
+    trap.opcode = NULL;
+    trap.operands = operands;
+    trap.addr = 12288;//0x3000
+    trap.opCount = 1;
+
+    /* Encode trap instruct */
+    error = encodeTRAP(&trap, NULL, 0);
+
+    /* Assert exit code as OK_VALID */
+    ck_assert(error == OK_VALID);
+    ck_assert_str_eq(trap.encoding, "1111000000001111");
+}
+END_TEST
+
+/** +
  * @fn int main(void)
  * @brief main method to initialize and create test suite
  *
@@ -333,6 +447,12 @@ int main(void)
 
     TCase *tc1_9 = tcase_create("END CORRECT");
 
+    TCase *tc1_10 = tcase_create("NOP CORRECT");
+    TCase *tc1_11 = tcase_create("NOP INCORRECT ADDRESS LESS THAN 0");
+    TCase *tc1_12 = tcase_create("NOP INCORRECT ADDRESS GREATER THAN 65535");
+    
+    TCase *tc1_13 = tcase_create("TRAP CORRECT");
+    
     /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
 
@@ -352,6 +472,12 @@ int main(void)
     suite_add_tcase(s1, tc1_8);
 
     suite_add_tcase(s1, tc1_9);
+
+    suite_add_tcase(s1, tc1_10);
+    suite_add_tcase(s1, tc1_11);
+    suite_add_tcase(s1, tc1_12);
+    
+    suite_add_tcase(s1, tc1_13);
     
     /* Add test methods to test cases */
     tcase_add_test(tc1_0, testEncoding_ORIG_CORRECT_);
@@ -366,7 +492,13 @@ int main(void)
     tcase_add_test(tc1_8, testEncoding_FILL_INCORRECT_OPERAND_GREATER_THAN_65535_);
 
     tcase_add_test(tc1_9, testEncoding_END_CORRECT_);
-       
+
+    tcase_add_test(tc1_10, testEncoding_NOP_CORRECT_);
+    tcase_add_test(tc1_11, testEncoding_NOP_INCORRECT_LESS_THAN_0_);
+    tcase_add_test(tc1_12, testEncoding_NOP_INCORRECT_GREATER_THAN_65535_);
+
+    tcase_add_test(tc1_13, testEncoding_TRAP_CORRECT_);
+    
     /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
 
