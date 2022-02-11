@@ -321,8 +321,8 @@ START_TEST (testEncoding_NOP_CORRECT_)
 
     /* Intialize struct instruct */
     nop.label = NULL;
-    nop.directive = "END";
-    nop.opcode = NULL;
+    nop.directive = NULL;
+    nop.opcode = "NOP";
     nop.operands = NULL;
     nop.addr = 12288;//0x3000
     nop.opCount = 1;
@@ -348,8 +348,8 @@ START_TEST (testEncoding_NOP_INCORRECT_LESS_THAN_0_)
 
     /* Initialize struct instruct */
     nop.label = NULL;
-    nop.directive = "NOP";
-    nop.opcode = NULL;
+    nop.directive = NULL;
+    nop.opcode = "NOP";
     nop.operands = NULL;
     nop.addr = -1;//Negative address
     nop.opCount = 1;
@@ -357,7 +357,7 @@ START_TEST (testEncoding_NOP_INCORRECT_LESS_THAN_0_)
     /* Encode nop instruct */
     error = encodeNOP(&nop, NULL, 0);
 
-    /* Assert exit code as INVALID_CONSTANT
+    /* Assert exit code as OTHER_ERROR
      * Exit code not 0 since address is invalid (<0)
      */
     ck_assert(error == OTHER_ERROR);
@@ -377,8 +377,8 @@ START_TEST (testEncoding_NOP_INCORRECT_GREATER_THAN_65535_)
 
     /* Initialize struct instruct */
     nop.label = NULL;
-    nop.directive = "NOP";
-    nop.opcode = NULL;
+    nop.directive = NULL;
+    nop.opcode = "NOP";
     nop.operands = NULL;
     nop.addr = 65536;//Address greater than 65535
     nop.opCount = 1;
@@ -386,7 +386,7 @@ START_TEST (testEncoding_NOP_INCORRECT_GREATER_THAN_65535_)
     /* Encode nop instruct */
     error = encodeNOP(&nop, NULL, 0);
 
-    /* Assert exit code as INVALID_CONSTANT
+    /* Assert exit code as OTHER_ERROR
      * Exit code not 0 since address is invalid (>65535)
      */
     ck_assert(error == OTHER_ERROR);
@@ -568,6 +568,94 @@ START_TEST (testEncoding_HALT_INCORRECT_GREATER_THAN_65535_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for ADD instruction
+ *
+ * @param testEncoding_ADD_CORRECT__
+ */
+START_TEST (testEncoding_ADD_CORRECT_)
+{
+    instruction add;
+    enum errorCode error;
+    char* operands[]={"R3", "R3", "#1"};
+
+    /* Intialize struct instruct */
+    add.label = NULL;
+    add.directive = NULL;
+    add.opcode = "ADD";
+    add.operands = operands;
+    add.addr = 12288;//0x3000
+    add.opCount = 1;
+
+    /* Encode add instruct */
+    error = encodeADD(&add, NULL, 0);
+
+    /* Assert exit code as OK_VALID */
+    ck_assert(error == OK_VALID);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for ADD instruction
+ *
+ * @param testEncoding_ADD_INCORRECT_LESS_THAN_0_
+ */
+START_TEST (testEncoding_ADD_INCORRECT_LESS_THAN_0_)
+{
+    instruction add;
+    enum errorCode error;
+    char* operands[]={"R3", "R3", "#1"};
+
+    /* Initialize struct instruct */
+    add.label = NULL;
+    add.directive = NULL;
+    add.opcode = "ADD";
+    add.operands = operands;
+    add.addr = -1;//Negative address
+    add.opCount = 1;
+
+    /* Encode add instruct */
+    error = encodeADD(&add, NULL, 0);
+
+    /* Assert exit code as OTHER_ERROR
+     * Exit code not 0 since address is invalid (<0)
+     */
+    ck_assert(error == OTHER_ERROR);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for ADD instruction
+ *
+ * @param testEncoding_ADD_INCORRECT_GREATER_THAN_65535_
+ */
+START_TEST (testEncoding_ADD_INCORRECT_GREATER_THAN_65535_)
+{
+    instruction add;
+    enum errorCode error;
+    char* operands[]={"R3", "R3", "#1"};
+
+    /* Initialize struct instruct */
+    add.label = NULL;
+    add.directive = NULL;
+    add.opcode = "ADD";
+    add.operands = operands;
+    add.addr = 65536;//Address greater than 65535
+    add.opCount = 1;
+
+    /* Encode add instruct */
+    error = encodeADD(&add, NULL, 0);
+
+    /* Assert exit code as OTHER_ERROR
+     * Exit code not 0 since address is invalid (>65535)
+     */
+    ck_assert(error == OTHER_ERROR);
+}
+END_TEST
+
 
 /** +
  * @fn int main(void)
@@ -605,6 +693,10 @@ int main(void)
     TCase *tc1_16 = tcase_create("HALT CORRECT");
     TCase *tc1_17 = tcase_create("HALT INCORRECT ADDRESS LESS THAN 0");
     TCase *tc1_18 = tcase_create("HALT INCORRECT ADDRESS GREATER THAN 65535");
+
+    TCase *tc1_19 = tcase_create("ADD CORRECT");
+    TCase *tc1_20 = tcase_create("ADD INCORRECT ADDRESS LESS THAN 0");
+    TCase *tc1_21 = tcase_create("ADD INCORRECT ADDRESS GREATER THAN 65535");
     
     /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
@@ -637,6 +729,10 @@ int main(void)
     suite_add_tcase(s1, tc1_16);
     suite_add_tcase(s1, tc1_17);
     suite_add_tcase(s1, tc1_18);
+
+    suite_add_tcase(s1, tc1_19);
+    suite_add_tcase(s1, tc1_20);
+    suite_add_tcase(s1, tc1_21);
     
     /* Add test methods to test cases */
     tcase_add_test(tc1_0, testEncoding_ORIG_CORRECT_);
@@ -663,6 +759,10 @@ int main(void)
     tcase_add_test(tc1_16, testEncoding_HALT_CORRECT_);
     tcase_add_test(tc1_17, testEncoding_HALT_INCORRECT_LESS_THAN_0_);
     tcase_add_test(tc1_18, testEncoding_HALT_INCORRECT_GREATER_THAN_65535_);
+
+    tcase_add_test(tc1_19, testEncoding_ADD_CORRECT_);
+    tcase_add_test(tc1_20, testEncoding_ADD_INCORRECT_LESS_THAN_0_);
+    tcase_add_test(tc1_21, testEncoding_ADD_INCORRECT_GREATER_THAN_65535_);
 
     /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
