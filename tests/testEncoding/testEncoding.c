@@ -483,6 +483,91 @@ START_TEST (testEncoding_TRAP_INCORRECT_OPERAND_GREATER_THAN_255_)
 }
 END_TEST
 
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for HALT instruction
+ *
+ * @param testEncoding_HALT_CORRECT__
+ */
+START_TEST (testEncoding_HALT_CORRECT_)
+{
+    instruction halt;
+    enum errorCode error;
+
+    /* Intialize struct instruct */
+    halt.label = NULL;
+    halt.directive = "HALT";
+    halt.opcode = NULL;
+    halt.operands = NULL;
+    halt.addr = 12288;//0x3000
+    halt.opCount = 1;
+
+    /* Encode halt instruct */
+    error = encodeHALT(&halt, NULL, 0);
+
+    /* Assert exit code as OK_VALID */
+    ck_assert(error == OK_VALID);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for HALT instruction
+ *
+ * @param testEncoding_HALT_INCORRECT_LESS_THAN_0_
+ */
+START_TEST (testEncoding_HALT_INCORRECT_LESS_THAN_0_)
+{
+    instruction halt;
+    enum errorCode error;
+
+    /* Initialize struct instruct */
+    halt.label = NULL;
+    halt.directive = "HALT";
+    halt.opcode = NULL;
+    halt.operands = NULL;
+    halt.addr = -1;//Negative address
+    halt.opCount = 1;
+
+    /* Encode halt instruct */
+    error = encodeHALT(&halt, NULL, 0);
+
+    /* Assert exit code as INVALID_CONSTANT
+     * Exit code not 0 since address is invalid (<0)
+     */
+    ck_assert(error == OTHER_ERROR);
+}
+END_TEST
+
+/** +
+ * @fn  START_TEST()
+ * @brief Test case for HALT instruction
+ *
+ * @param testEncoding_HALT_INCORRECT_GREATER_THAN_65535_
+ */
+START_TEST (testEncoding_HALT_INCORRECT_GREATER_THAN_65535_)
+{
+    instruction halt;
+    enum errorCode error;
+
+    /* Initialize struct instruct */
+    halt.label = NULL;
+    halt.directive = "HALT";
+    halt.opcode = NULL;
+    halt.operands = NULL;
+    halt.addr = 65536;//Address greater than 65535
+    halt.opCount = 1;
+
+    /* Encode halt instruct */
+    error = encodeHALT(&halt, NULL, 0);
+
+    /* Assert exit code as INVALID_CONSTANT
+     * Exit code not 0 since address is invalid (>65535)
+     */
+    ck_assert(error == OTHER_ERROR);
+}
+END_TEST
+
 
 /** +
  * @fn int main(void)
@@ -516,6 +601,10 @@ int main(void)
     TCase *tc1_13 = tcase_create("TRAP CORRECT");
     TCase *tc1_14 = tcase_create("TRAP INCORRECT OPERAND LESS THAN 0");
     TCase *tc1_15 = tcase_create("TRAP INCORRECT OPERAND GREATER THAN 255");
+
+    TCase *tc1_16 = tcase_create("HALT CORRECT");
+    TCase *tc1_17 = tcase_create("HALT INCORRECT ADDRESS LESS THAN 0");
+    TCase *tc1_18 = tcase_create("HALT INCORRECT ADDRESS GREATER THAN 65535");
     
     /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
@@ -544,6 +633,10 @@ int main(void)
     suite_add_tcase(s1, tc1_13);
     suite_add_tcase(s1, tc1_14);
     suite_add_tcase(s1, tc1_15);
+
+    suite_add_tcase(s1, tc1_16);
+    suite_add_tcase(s1, tc1_17);
+    suite_add_tcase(s1, tc1_18);
     
     /* Add test methods to test cases */
     tcase_add_test(tc1_0, testEncoding_ORIG_CORRECT_);
@@ -565,7 +658,12 @@ int main(void)
 
     tcase_add_test(tc1_13, testEncoding_TRAP_CORRECT_);
     tcase_add_test(tc1_14, testEncoding_TRAP_INCORRECT_OPERAND_LESS_THAN_0_);
-    tcase_add_test(tc1_15, testEncoding_TRAP_INCORRECT_OPERAND_GREATER_THAN_255_);   
+    tcase_add_test(tc1_15, testEncoding_TRAP_INCORRECT_OPERAND_GREATER_THAN_255_);
+
+    tcase_add_test(tc1_16, testEncoding_HALT_CORRECT_);
+    tcase_add_test(tc1_17, testEncoding_HALT_INCORRECT_LESS_THAN_0_);
+    tcase_add_test(tc1_18, testEncoding_HALT_INCORRECT_GREATER_THAN_65535_);
+
     /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
 
