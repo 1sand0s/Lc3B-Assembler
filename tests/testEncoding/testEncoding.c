@@ -593,6 +593,7 @@ START_TEST (testEncoding_ADD_CORRECT_)
 
     /* Assert exit code as OK_VALID */
     ck_assert(error == OK_VALID);
+    ck_assert_str_eq(add.encoding, "0001011011100001");
 }
 END_TEST
 
