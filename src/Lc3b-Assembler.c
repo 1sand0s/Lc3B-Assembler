@@ -52,7 +52,7 @@
 
 /** +
  * @def INDENT_INSTRUCTION_
- * @brief Number of spaces for indenting instruction table during prinitng
+ * @brief Number of spaces for indenting instruction table during printing
  *
  */
 #define INDENT_INSTRUCTION_ 10
@@ -444,59 +444,61 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
             if (getline( & line, & len, in ) == -1)
                 state = STOP;
             else {
-                char ** tokens;
-                int len1 = 0;
-                lexer(line, & tokens, & len1);
-                if (len1 != 0) {
-                    enum pFSM * stateT;
-                    errorp = integrityCheck( & tokens, & len1, & stateT);
-                    if (errorp == OK_VALID) {
-                        if (stateT[0] == ORIG) {
-                            state = PSTART;
-                            startAddr = dec2dec(dec2dec2(tokens[1]));
-                            insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, 0, startAddr);
-
-                        } else {
-                            state = STOP;
-                        }
-                    } else {
-                        state = STOP;
-                    }
-                    free(stateT);
-                    freeLexemes( & tokens, & len1);
-                }
-
+	      char ** tokens;
+	      int len1 = 0;
+	      lexer(line, & tokens, & len1);
+	      if (len1 != 0) {
+		enum pFSM * stateT;
+		errorp = integrityCheck( & tokens, & len1, & stateT);
+		if (errorp == OK_VALID) {
+		  if (stateT[0] == ORIG) {
+		    state = PSTART;
+		    startAddr = dec2dec(dec2dec2(tokens[1]));
+		    insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, 0, startAddr);
+		  }
+		  else {
+		    state = STOP;
+		  }
+		}
+		else {
+		  state = STOP;
+		}
+		free(stateT);
+		freeLexemes( & tokens, & len1);
+	      }
             }
             break;
 
         case PSTART:
             if (getline( & line, & len, in ) == -1)
-                state = STOP;
+	      state = STOP;
             else {
-                char ** tokens;
-                int len1 = 0;
-                lexer(line, & tokens, & len1);
-                if (len1 != 0) {
-                    index++;
-                    enum pFSM * stateT;
-                    errorp = integrityCheck( & tokens, & len1, & stateT);
-                    if (errorp == OK_VALID) {
-                        if (stateT[0] == ORIG) {
-                            state = STOP;
-                        } else if (stateT[0] == LABEL) {
-                            insertSymbol(symbolTable, tableCount, tokens[0], index, startAddr);
-                        } else if (stateT[0] == END || stateT[1] == END) {
-                            state = PEND;
-                        }
-                        insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, index - 1, startAddr);
-                    } else {
-                        state = STOP;
-                    }
-                    free(stateT);
-                    freeLexemes( & tokens, & len1);
-                }
+	      char ** tokens;
+	      int len1 = 0;
+	      lexer(line, & tokens, & len1);
+	      if (len1 != 0) {
+		index++;
+		enum pFSM * stateT;
+		errorp = integrityCheck( & tokens, & len1, & stateT);
+		if (errorp == OK_VALID) {
+		  if (stateT[0] == ORIG) {
+		    state = STOP;
+		  }
+		  else if (stateT[0] == LABEL) {
+		    insertSymbol(symbolTable, tableCount, tokens[0], index, startAddr);
+		  }
+		  else if (stateT[0] == END || stateT[1] == END) {
+		    state = PEND;
+		  }
+		  insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, index - 1, startAddr);
+		}
+		else {
+		  state = STOP;
+		}
+		free(stateT);
+		freeLexemes( & tokens, & len1);
+	      }
             }
-
             break;
 
         case PEND:
@@ -506,19 +508,17 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
 
         case STOP:
         if(startAddr)
-                free(startAddr);
-            errorp = errorp == OK_VALID ? OTHER_ERROR : errorp;
-            flag = false;
-            break;
+	  free(startAddr);
+	errorp = errorp == OK_VALID ? OTHER_ERROR : errorp;
+	flag = false;
+	break;
         }
     }
 
     if (line) {
-        free(line);
+      free(line);
     }
-
     rewind( in );
-
     return errorp;
 }
 
