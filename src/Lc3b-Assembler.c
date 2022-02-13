@@ -78,6 +78,21 @@ v *
  */
 #define NUMBER_OF_INSTRUCTIONS_ 28
 
+/** +
+ * @def NUMBER_OF_REGISTERS_
+ * @brief Number of registers supported by ISA
+ *
+ */
+#define NUMBER_OF_REGISTERS_ 8
+
+/** +
+ * @def NUMBER_OF_DIRECTIVES_
+ * @brief Number of directives supported by ISA
+ *
+ */
+#define NUMBER_OF_DIRECTIVES_ 3
+
+
 
 const char * inval[43] = {
 			  "IN",
@@ -125,6 +140,92 @@ const char * inval[43] = {
 			  "R7"
 };
 
+const char * directives[NUMBER_OF_DIRECTIVES_]={
+						".ORIG",
+						".FILL",
+						".END"
+};
+
+const enum pFSM pDirectives[NUMBER_OF_DIRECTIVES_]={
+					       ORIG,
+					       FILL,
+					       END
+};
+
+const char * regs[NUMBER_OF_REGISTERS_]={
+					 "R0",
+					 "R1",
+					 "R2",
+					 "R3",
+					 "R4",
+					 "R5",
+					 "R6",
+					 "R7"
+};
+
+const char * opcodes[NUMBER_OF_INSTRUCTIONS_]={
+					       "ADD",
+					       "AND",
+					       "JMP",
+					       "JSR",
+					       "JSRR",
+					       "LDB",
+					       "LDW",
+					       "LEA",
+					       "NOP",
+					       "NOT",
+					       "RET",
+					       "LSHF",
+					       "RSHFL",
+					       "RSHFA",
+					       "RTI",
+					       "STB",
+					       "STW",
+					       "TRAP",
+					       "XOR",
+					       "HALT",
+					       "BR",
+					       "BRN",
+					       "BRZ",
+					       "BRP",
+					       "BRNZ",
+					       "BRNP",
+					       "BRZP",
+					       "BRNZP"
+};
+
+const enum pFSM pOpcodes[NUMBER_OF_INSTRUCTIONS_] = {
+						     ADD,
+						     AND,
+						     JMP,
+						     JSR,
+						     JSRR,
+						     LDB,
+						     LDW,
+						     LEA,
+						     NOP,
+						     NOT,
+						     RET,
+						     LSHF,
+						     RSHFL,
+						     RSHFA,
+						     RTI,
+						     STB,
+						     STW,
+						     TRAP,
+						     XOR,
+						     HALT,
+						     BR,
+						     BRN,
+						     BRZ,
+						     BRP,
+						     BRNZ,
+						     BRNP,
+						     BRZP,
+						     BRNZP
+};
+
+
 /* Valid State Transistions for tokens of an instruction */
 const enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] = {
 				    {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
@@ -162,37 +263,6 @@ const enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] =
                                     {HALT, IGN, IGN, IGN, IGN}      ,       {LABEL, HALT, IGN, IGN, IGN},
                                     {NOP, IGN, IGN, IGN, IGN}       ,       {LABEL, NOP, IGN, IGN, IGN}
                                 };
-
-const enum pFSM pStates[NUMBER_OF_INSTRUCTIONS_] = {
-						    ADD,
-						    AND,
-						    JMP,
-						    JSR,
-						    JSRR,
-						    LDB,
-						    LDW,
-						    LEA,
-						    NOP,
-						    NOT,
-						    RET,
-						    LSHF,
-						    RSHFL,
-						    RSHFA,
-						    RTI,
-						    STB,
-						    STW,
-						    TRAP,
-						    XOR,
-						    HALT,
-						    BR,
-						    BRN,
-						    BRZ,
-						    BRP,
-						    BRNZ,
-						    BRNP,
-						    BRZP,
-						    BRNZP
-};
 
 /** +
  * @fn enum errorCode (*[])(instruction*, symbol*, int)
@@ -1739,7 +1809,6 @@ void freeLexemes(char ** * lexemes, int * len) {
     for (int i = 0; i < * len; i++) {
         free(( * lexemes)[i]);
     }
-
     free( * lexemes);
 }
 
@@ -1755,7 +1824,6 @@ void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
     for (int j = 0; j < * tableCount; j++) {
         free(( * symbolTable)[j].symbolName);
     }
-
     free( * symbolTable);
 }
 
@@ -1772,15 +1840,12 @@ void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
         free(( * instructionTable)[j].label);
         free(( * instructionTable)[j].directive);
         free(( * instructionTable)[j].opcode);
-
         for (int i = 0; i < ( * instructionTable)[j].opCount; i++)
             free(( * instructionTable)[j].operands[i]);
 
         free(( * instructionTable)[j].operands);
         free(( * instructionTable)[j].encoding);
-
     }
-
     free( * instructionTable);
 }
 
@@ -2082,70 +2147,85 @@ enum pFSM checkLabel(char * str) {
 }
 
 /** +
- * @fn enum pFSM checkpOP(char*)
+ * @fn enum pFSM checkDirective(char*)
  * @brief Check if directive is valid
  *
- * @param str
- * @return pFSM
+ * @param str   string containing directive
+ * @return pFSM lexeme (ORIG, FILL, END) or INVALID
  */
-enum pFSM checkpOP(char * str) {
-    if (strncmp(str, ".ORIG", strlen(str)) == 0 && (strlen(str) == strlen(".ORIG")))
-        return ORIG;
+enum pFSM checkDirective(char * str) {
+  enum pFSM op = INVALID;
+  if (strlen(str) > 0) {
 
-    else if (strncmp(str, ".FILL", strlen(str)) == 0 && (strlen(str) == strlen(".FILL")))
-        return FILL;
-
-    else if (strncmp(str, ".END", strlen(str)) == 0 && (strlen(str) == strlen(".END")))
-        return END;
-
-    else
-        return INVALID;
+    /* Iterate through valid directive names given in directives variable
+     * to find a match
+     */
+    for (int j = 0; j < NUMBER_OF_DIRECTIVES_; j++) {
+      if (strncmp(str, directives[j], strlen(str)) == 0) {
+	if (strlen(str) == strlen(directives[j])) {
+	  op = pDirectives[j];
+	  break;
+	}
+      }
+    }
+  }
+  return op;
 }
 
 /** +
  * @fn enum pFSM checkInst(char*)
  * @brief Check if opcode used exists in ISA
  *
- * @param str
- * @return pFSM
+ * @param str   string containing opcode
+ * @return pFSM lexeme (instruction) or INVALID
  */
 enum pFSM checkInst(char * str) {
-    enum pFSM op = INVALID;
-
-    if (strlen(str) > 0) {
-        for (int j = 0; j < NUMBER_OF_INSTRUCTIONS_; j++) {
-            if (strncmp(str, inval[j + 7], strlen(str)) == 0) {
-                if (strlen(str) == strlen(inval[j + 7])) {
-                    op = pStates[j];
-                    break;
-                }
-            }
-        }
+  enum pFSM op = INVALID;
+  if (strlen(str) > 0) {
+    
+    /* Iterate through valid opcode names given in opcodes variable
+     * to find a match
+     */
+    for (int j = 0; j < NUMBER_OF_INSTRUCTIONS_; j++) {
+      if (strncmp(str, opcodes[j], strlen(str)) == 0) {
+	if (strlen(str) == strlen(opcodes[j])) {
+	  op = pOpcodes[j];
+	  break;
+	}
+      }
     }
-    return op;
+  }
+  return op;
 }
 
 /** +
  * @fn enum pFSM checkRegister(char*)
- * @brief CHeck if registers used are allowed
+ * @brief Check if registers used are valid (R[0-7])
  *
- * @param str
- * @return pFSM
+ * @param str   string containing register name
+ * @return pFSM lexeme (REG) or INVALID
  */
 enum pFSM checkRegister(char * str) {
-    enum pFSM op = INVALID;
+  enum pFSM op = INVALID;
 
-    if (strlen(str) == 2) {
-        for (int j = 0; j < 8; j++) {
-            if (strncmp(str, inval[j + 35], strlen(str)) == 0) {
-                if (strlen(str) == strlen(inval[j + 35])) {
-                    op = REG;
-                    break;
-                }
-            }
-        }
+  /* A register name must contain exactly two characters
+   * [R][0-7]
+   */
+  if (strlen(str) == 2) {
+
+    /* Iterate through valid register names given in regs variable
+     * to find a match
+     */
+    for (int j = 0; j < NUMBER_OF_REGISTERS_; j++) {
+      if (strncmp(str, regs[j], strlen(str)) == 0) {
+	if (strlen(str) == strlen(regs[j])) {
+	  op = REG;
+	  break;
+	}
+      }
     }
-    return op;
+  }
+  return op;
 }
 
 /** +
@@ -2154,7 +2234,7 @@ enum pFSM checkRegister(char * str) {
  *        Base10 number for uniformity
  *
  * @param str   Immediate value 
- * @return pFSM lexeme (IMM)
+ * @return pFSM lexeme (IMM) or INVALID
  */
 enum pFSM checkImmidiate(char ** str) {
   /* Default placeholder if immediate is invalid*/
@@ -2219,9 +2299,9 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
     state = checkLabel((*tokens)[step]);
 
     /* Check if current token is a Directive (ORIG, FILL, END) */
-    state = state == INVALID ? checkpOP((*tokens)[step]) : state;
+    state = state == INVALID ? checkDirective((*tokens)[step]) : state;
 
-    /* Check if current token is an opcode (any lexeme in pStates) */
+    /* Check if current token is an opcode (any lexeme in pOpcodes) */
     state = state == INVALID ? checkInst((*tokens)[step]) : state;
 
     /* Check if current token is a register operand (REG) */
@@ -2377,11 +2457,11 @@ int firstInstanceofOpcode(enum pFSM * states, int len) {
     for (; j < len; j++) {
         int i = 0;
 
-	/* Iterate through pStates (stores lexemes (pFSM states) of all instructions)
+	/* Iterate through pOpcodes (stores lexemes (pFSM states) of all instructions)
 	 * to check if there is a match for any lexeme in the given lexeme array 
 	 */
         for (; i < NUMBER_OF_INSTRUCTIONS_ ; i++)
-            if (states[j] == pStates[i]) break;
+            if (states[j] == pOpcodes[i]) break;
 
 	/* If found than exit loop */
         if (i != NUMBER_OF_INSTRUCTIONS_) break;
