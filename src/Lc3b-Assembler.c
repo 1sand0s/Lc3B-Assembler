@@ -39,7 +39,7 @@
 /** +
  * @def Debug_Print_SymbolTable
  * @brief Comment to stop printing the Symbol table to stdout
- *
+v *
  */
 #define Debug_Print_SymbolTable
 
@@ -59,7 +59,7 @@
 
 /** +
  * @def MAX_INSTRUCTION_LENGTH_
- * @brief Maximum length/number of tokens allowed in a valid instruction
+ * @brief Maximum length/number of lexemes allowed in a valid instruction
  *
  */
 #define MAX_INSTRUCTION_LENGTH_ 5
@@ -79,55 +79,55 @@
 #define NUMBER_OF_INSTRUCTIONS_ 28
 
 
-char * inval[43] = {
-		    "IN",
-		    "OUT",
-		    "GETC",
-		    "PUTS",
-		    ".ORIG",
-		    ".FILL",
-		    ".END",
-		    "ADD",
-		    "AND",
-		    "JMP",
-		    "JSR",
-		    "JSRR",
-		    "LDB",
-		    "LDW",
-		    "LEA",
-		    "NOP",
-		    "NOT",
-		    "RET",
-		    "LSHF",
-		    "RSHFL",
-		    "RSHFA",
-		    "RTI",
-		    "STB",
-		    "STW",
-		    "TRAP",
-		    "XOR",
-		    "HALT",
-		    "BR",
-		    "BRN",
-		    "BRZ",
-		    "BRP",
-		    "BRNZ",
-		    "BRNP",
-		    "BRZP",
-		    "BRNZP",
-		    "R0",
-		    "R1",
-		    "R2",
-		    "R3",
-		    "R4",
-		    "R5",
-		    "R6",
-		    "R7"
+const char * inval[43] = {
+			  "IN",
+			  "OUT",
+			  "GETC",
+			  "PUTS",
+			  ".ORIG",
+			  ".FILL",
+			  ".END",
+			  "ADD",
+			  "AND",
+			  "JMP",
+			  "JSR",
+			  "JSRR",
+			  "LDB",
+			  "LDW",
+			  "LEA",
+			  "NOP",
+			  "NOT",
+			  "RET",
+			  "LSHF",
+			  "RSHFL",
+			  "RSHFA",
+			  "RTI",
+			  "STB",
+			  "STW",
+			  "TRAP",
+			  "XOR",
+			  "HALT",
+			  "BR",
+			  "BRN",
+			  "BRZ",
+			  "BRP",
+			  "BRNZ",
+			  "BRNP",
+			  "BRZP",
+			  "BRNZP",
+			  "R0",
+			  "R1",
+			  "R2",
+			  "R3",
+			  "R4",
+			  "R5",
+			  "R6",
+			  "R7"
 };
 
 /* Valid State Transistions for tokens of an instruction */
-enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] = {
-                                    {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
+const enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] = {
+				    {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
                                     {FILL, IMM, IGN, IGN, IGN}      ,       {LABEL, FILL, IMM, IGN, IGN},
                                     {END, IGN, IGN, IGN, IGN}       ,       {LABEL, END, IGN, IGN, IGN},
                                     {ADD, REG, REG, IMM, IGN}       ,       {ADD, REG, REG, REG, IGN},
@@ -2150,108 +2150,161 @@ enum pFSM checkRegister(char * str) {
 
 /** +
  * @fn enum pFSM checkImmidiate(char**)
- * @brief Check if immediate values used are valid
+ * @brief Check if immediate values used are valid and convert to 
+ *        Base10 number for uniformity
  *
- * @param str
- * @return pFSM
+ * @param str   Immediate value 
+ * @return pFSM lexeme (IMM)
  */
 enum pFSM checkImmidiate(char ** str) {
-    enum pFSM op = INVALID;
+  /* Default placeholder if immediate is invalid*/
+  enum pFSM op = INVALID;
 
-    if (strlen( * str) >= 2) {
-        if (isValidHex( * str)) {
-            int dec = hex2dec( * str);
-            free( * str);
-            * str = int2str(dec);
-            prepend(str, "#");
-            op = IMM;
-        }
-        else if (isValidDec( * str)) {
-            op = IMM;
-        }
+  /* All immediate operands must contain a descriptor indicating their base
+   * hence must be atleast 2 characters (['X'/'#'],[value])
+   */
+  if (strlen( * str) >= 2) {
+
+    /* If immediate is a hex string then convert to Base10 string */
+    if (isValidHex( * str)) {
+      int dec = hex2dec( * str);
+      free( * str);
+      * str = int2str(dec);
+
+      /* Prepend descriptor '#' for Base10 indication */
+      prepend(str, "#");
+      op = IMM;
     }
-    return op;
+    else if (isValidDec( * str)) {
+      op = IMM;
+    }
+  }
+  return op;
 }
 
 /** +
  * @fn enum errorCode integrityCheck(char***, int*, enum pFSM**)
- * @brief
+ * @brief Checks the integerity of an instruction by converting its tokens
+ *        into corresponding lexemes and comparing them with list of valid
+ *	  lexeme sequences (pTransitions)
  *
- * @param tokens
- * @param count
- * @param stateTransition
- * @return errorCode
+ *        Example :
+ *        Instruction :   A      LEA    R1,     B
+ *        Tokens      : {"A",   "LEA", "R1",   "B"}
+ *        Lexeme Array: {LABEL,  LEA,   REG,  LABEL} 
+ *
+ *        If Lexeme Array matches any pattern in pTransitions then return OK_VALID
+ *        Else return appropriate error
+ *       
+ *
+ * @param tokens           Tokens after parsing a line containing an instruction
+ * @param count            Number of tokens
+ * @param stateTransition  Corresponding lexeme array (must be freed by the caller)
+ * @return errorCode       Error if the instruction is invalid
  */
 enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateTransition) {
+  int step = 0;
+  bool flag;
+  enum pFSM state = START;
 
-    int step = 0;
-    bool flag;
-    enum pFSM state = START;
+  /* Allocate memory to lexeme array */
+  *stateTransition = malloc(sizeof(enum pFSM));
 
-    *stateTransition = malloc(sizeof(enum pFSM));
+  /* Iterate through tokens and convert to corresponding lexemes */
+  while (step < *count) {
+    *stateTransition = realloc(*stateTransition,
+			       (step + 1) * sizeof(enum pFSM));
 
-    while (step < *count) {
-        *stateTransition = realloc(*stateTransition,
-                                   (step + 1) * sizeof(enum pFSM));
-        state = checkLabel((*tokens)[step]);
-        state = state == INVALID ? checkpOP((*tokens)[step]) : state;
-        state = state == INVALID ? checkInst((*tokens)[step]) : state;
-        state = state == INVALID ? checkRegister((*tokens)[step]) : state;
-        state = state == INVALID ? checkImmidiate(&((*tokens)[step])) : state;
+    /* Check if current token is a LABEL */
+    state = checkLabel((*tokens)[step]);
 
-        (*stateTransition)[step] = state;
+    /* Check if current token is a Directive (ORIG, FILL, END) */
+    state = state == INVALID ? checkpOP((*tokens)[step]) : state;
 
-        if (state == TRAP) {
-            if (step < *count) {
-                if (!isValidHex((*tokens)[step + 1])) {
-                    return INVALID_CONSTANT;
-                }
-            }
-        }
-        step++;
+    /* Check if current token is an opcode (any lexeme in pStates) */
+    state = state == INVALID ? checkInst((*tokens)[step]) : state;
+
+    /* Check if current token is a register operand (REG) */
+    state = state == INVALID ? checkRegister((*tokens)[step]) : state;
+
+    /* Check if current token is an immediate operand (IMM) */
+    state = state == INVALID ? checkImmidiate(&((*tokens)[step])) : state;
+
+    /* Assign state to current index of lexeme array */
+    (*stateTransition)[step] = state;
+    
+    if (state == TRAP) {
+      if (step < *count) {
+	if (!isValidHex((*tokens)[step + 1])) {
+	  return INVALID_CONSTANT;
+	}
+      }
+    }
+    step++;
+  }
+
+  /* Check if lexeme array matches pattern in pTransitions (list of valid lexeme sequences
+   * for all instructions in the Lc3b ISA)
+   */
+  for (int i = 0; i < MAX_VALID_COMBINATIONS_; i++) {
+    flag = true;
+    int j = 0;
+    
+    for (; j < step; j++) {
+      flag &= ((*stateTransition)[j] == pTransitions[i][j]);
     }
 
-    for (int i = 0; i < 68; i++) {
+    /* Even if flag is true the match may still be partial 
+     *
+     *        Example : 
+     *        Instruction             :    A    ADD   R1, R1
+     *        Lexeme Array            : {LABEL, ADD, REG, REG}
+     *        Partial Matching Pattern: {LABEL, ADD, REG, REG, REG/IMM}
+     *                                                           ^
+     *                                                           |
+     *                                               Missing operand so still invalid
+     *                                               despite partial match
+     *
+     */
+    if (flag) {
 
-        flag = true;
-        int j = 0;
+      /* If there is partial match then check if next lexeme in pTransitions is IGN (ignore) */
+      flag &= (j < MAX_INSTRUCTION_LENGTH_ ? (pTransitions[i][j] == IGN) : flag);
 
-        for (; j < step; j++) {
-            flag &= ((*stateTransition)[j] == pTransitions[i][j]);
-        }
-
-        if (flag) {
-
-            flag &= (j < 5 ? (pTransitions[i][j] == IGN) : flag);
-            if (flag)
-                break;
-        }
+      /* If flag is still true then the instruction is valid*/
+      if (flag)
+	break;
     }
+  }
 
-    if (!flag) {
-        int i = firstInstanceofOperands(*stateTransition,
-                                        step);
+  /* If flag is false then identify type of error */
+  if (!flag) {
 
-        if (i == 0) {
-            if ((*stateTransition)[0] != ORIG && (*stateTransition)[0] != FILL
-                    && (*stateTransition)[0] != END) {
-                return INVALID_OPCODE;
-            }
-        } else {
-            if ((*stateTransition)[i - 1] == LABEL)
-                return INVALID_OPCODE;
-        }
-        return OTHER_ERROR;
-    }
+    /* Get index in lexeme array where operands first appear */
+    int i = firstInstanceofOperands(*stateTransition,
+				    step);
 
-#ifdef Debug_Print
-    if (flag)
-        printf("True\n");
+    /* If operands appear at 0th index then 
+     * Operands must follow opcode/directive
+     */
+    if (i == 0) 
+      return INVALID_OPCODE;
+    
+    /* If label appears immediately before operands then
+     * Labels can only appear at the beginning of an instruction or at the end
+     */
+    else if ((*stateTransition)[i - 1] == LABEL)
+      return INVALID_OPCODE;
     else
-        printf("False\n");
+      return OTHER_ERROR;
+  }
+#ifdef Debug_Print
+  if (flag)
+    printf("True\n");
+  else
+    printf("False\n");
 #endif
-
-    return OK_VALID;
+  return OK_VALID;
 }
 
 /** +
