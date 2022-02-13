@@ -333,6 +333,7 @@ START_TEST (testEncoding_NOP_CORRECT_)
 
     /* Assert exit code as OK_VALID */
     ck_assert(error == OK_VALID);
+    ck_assert_str_eq(nop.encoding, "0000000000000000");
 }
 END_TEST
 
@@ -508,6 +509,7 @@ START_TEST (testEncoding_HALT_CORRECT_)
 
     /* Assert exit code as OK_VALID */
     ck_assert(error == OK_VALID);
+    ck_assert_str_eq(halt.encoding, "1111000000100101");
 }
 END_TEST
 
