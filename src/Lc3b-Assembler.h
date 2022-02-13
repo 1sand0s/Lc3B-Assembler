@@ -83,8 +83,8 @@ enum errorCode {
  *
  */
 typedef struct symbol {
-    char * symbolName; /* Name of the symbol */
-    int addr; /* address where the symbol is first encountered */
+  char * symbolName; /* Name of the symbol */
+  int addr;          /* address where the symbol is first encountered */
 }
 symbol;
 
@@ -92,15 +92,39 @@ symbol;
  * @struct instruction
  * @brief Struct to hold instruction information
  *
+ *          example 1:  ADDRESS | LABEL | DIRECTIVE | OPERANDS
+ *                       x3000      A      .FILL       x3050
+ *                      
+ *                      char *label     = "A"
+ *                      char *directive = ".FILL"
+ *                      char *opcode    = NULL
+ *                      char *operands  = {"#12368"}
+ *                      char *encoding  = "0011000001010000"
+ *                      int addr        = 12288
+ *                      int opCount     = 1 
+ *
+ *
+ *          example 2:  ADDRESS | LABEL | DIRECTIVE |    OPERANDS
+ *                       x3000               ADD        R3, R3, #1
+ *                      
+ *                      char *label     = NULL
+ *                      char *directive = NULL
+ *                      char *opcode    = "ADD"
+ *                      char *operands  = {"R3", "R3", "#1"}
+ *                      char *encoding  = "0001011011100001"
+ *                      int addr        = 12288
+ *                      int opCount     = 3 
+ *
+ *
  */
 typedef struct instruction {
-    char * label;       /* Label if any */
-    char * directive;   /* Directive if any (Directive and Opcode mututally exclusive) */
-    char * opcode; /* Opcode if any */
-    char ** operands; /* List of Operands (Registers, Constants etc) */
-    char * encoding; /* Instruction encoding after assembly */
-    int addr; /* Address of the instruction */
-    int opCount; /* Number of Operands */
+  char * label;       /* Label if any */
+  char * directive;   /* Directive if any (Directive and Opcode mututally exclusive) */
+  char * opcode;      /* Opcode if any */
+  char ** operands;   /* List of Operands (Registers, Constants etc) */
+  char * encoding;    /* Instruction encoding after assembly */
+  int addr;           /* Address of the instruction */
+  int opCount;        /* Number of Operands */
 }
 instruction;
 

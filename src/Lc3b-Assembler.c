@@ -1755,7 +1755,6 @@ void freeLexemes(char ** * lexemes, int * len) {
  * @return void
  */
 void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
-
     for (int j = 0; j < * tableCount; j++) {
         free(( * symbolTable)[j].symbolName);
     }
@@ -1803,43 +1802,49 @@ void lexer(char * line, char ** * tokens, int * len) {
     printf("\n%s\n", line);
 #endif
 
+    /* Get index of beginning of comments if any */
     size_t index = strcspn(line, ";");
 
-    if (index != 0) //Ignore comment lines
+    /* Ignore lines which are completely comments*/
+    if (index != 0)
     {
-
-        /********************************Tokenize, Parse for Integrity check and create Symbol Table**************/
-
         char * subbuff = malloc(index + 1);
+
+	/* Copy line from <*.asm> file into temporary buffer */
         strncpy(subbuff, &line[0], index);
-    subbuff[index] = '\0';
+	subbuff[index] = '\0';
 
 #ifdef Debug_Print
         printf("%s\n", subbuff);
 #endif
 
+	/* Tokenize line with \n and \t as seperators */
         char * token = strtok(subbuff, " ,\n\t");
-        //*tokens = malloc(sizeof(char*));
-        int c = 0;
+
+	/* Initialize len to 0 */
+	int c = 0;
 
         while (token != NULL) {
-            * tokens = c == 0 ? malloc(sizeof(char * )) : realloc( * tokens, (c + 1) * sizeof(char * ));
-            ( * tokens)[c] = malloc((strlen(token) + 1) * sizeof(char));
-            strncpy(( * tokens)[c], token, (size_t)(strlen(token) + 1));
-            toUpperCase(( * tokens)[c]);
-            token = strtok(NULL, " ,\n\t");
-            c++;
+	  * tokens = c == 0 ? malloc(sizeof(char * )) : realloc( * tokens, (c + 1) * sizeof(char * ));
+	  ( * tokens)[c] = malloc((strlen(token) + 1) * sizeof(char));
+
+	  /* Copy current token from line into tokens variable */
+	  strncpy(( * tokens)[c], token, (size_t)(strlen(token) + 1));
+
+	  /* Convert all tokens to uppercase for uniformity */
+	  toUpperCase(( * tokens)[c]);
+
+	  /* Get next token */
+	  token = strtok(NULL, " ,\n\t");
+	  c++;
         }
 
-        * len = c;
+	/* Keep reference to number of extracted tokens */
+	*len = c;
 
-        /***********************Cleanup Buffs***************************/
+        /* Free buffer used to store line from <*.asm> file */
         free(subbuff);
-        /***************************************************************/
-
-        /*************************************************************************************************/
     }
-
 }
 
 /** +
@@ -1850,40 +1855,63 @@ void lexer(char * line, char ** * tokens, int * len) {
  * @return int
  */
 int hex2dec(char * str) {
-    int dec = INT_MAX;
-    bool valid = true;
+  /* INT_MAX used as default placeholder to indicate invalid hex string */
+  int dec = INT_MAX;
+  bool valid = true;
 
-    if (strlen(str) >= 2) {
-        if (str[0] == 'X') {
-            for (int i = 1; i < strlen(str); i++) {
-                if (!isxdigit(str[i])) {
-                    if (!((str[i] == '-' || str[i] == '+') && i == 1)) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
+  /* All valid hex strings are represented as follows
+   *
+   *    Descriptor |  Value
+   *        X      |  3000
+   *        X      |  3050
+   * 
+   * Therefore all hex strings must have atleast 2 characters ("X" and the value)
+   */
+  if (strlen(str) >= 2) {
+    
+    /* Expect descriptor at 0th index to be 'X' since 'lexer' converts all 
+     * extracted tokens to uppercase for uniformity
+     */
+    if (str[0] == 'X') {
+      
+      /* Iterate through characters to make sure hex string is valid */
+      for (int i = 1; i < strlen(str); i++) {
 
-            dec = valid ? strtol((str + 1), NULL, 16) : dec;
-        }
+	/* checks if a digit is 0-9 or A-F */
+	if (!isxdigit(str[i])) {
+	  
+	  /* If not digit and is '-' or '+' then it can only occur 
+	   * immediately after 'X'/ 1st index for hex string to be valid
+	   */
+	  if (!((str[i] == '-' || str[i] == '+') && i == 1)) {
+	    valid = false;
+	    break;
+	  }
+	}
+      }
+      
+      /* If valid then convert to equivalent Base10 number */
+      dec = valid ? strtol((str + 1), NULL, 16) : dec;
     }
-
-    return dec;
+  }
+  return dec;
 }
 
 /** +
  * @fn char dec2hex*(int)
  * @brief Convert a Base10 number into hex string
+ *     
  *
- * @param dec
- * @return char*
+ * @param dec    The Base10 number to convert to hex string
+ * @return char* The hex string, caller must free the memory
  */
 char * dec2hex(int dec) {
-    char * hex = malloc(sizeof(char * ));
+  /* Allocate memory to store hex string */
+  char * hex = malloc(sizeof(char * ));
 
-    sprintf(hex, "%.4X", dec);
-
-    return hex;
+  /* Convert Base10 to hex string*/
+  sprintf(hex, "%.4X", dec);
+  return hex;
 }
 
 /** +
