@@ -71,51 +71,58 @@
  */
 #define MAX_VALID_COMBINATIONS_ 68
 
+/** +
+ * @def NUMBER_OF_INSTRUCTIONS_
+ * @brief Number of instructions in the Lc3B ISA
+ *
+ */
+#define NUMBER_OF_INSTRUCTIONS_ 28
+
 
 char * inval[43] = {
-    "IN",
-    "OUT",
-    "GETC",
-    "PUTS",
-    ".ORIG",
-    ".FILL",
-    ".END",
-    "ADD",
-    "AND",
-    "JMP",
-    "JSR",
-    "JSRR",
-    "LDB",
-    "LDW",
-    "LEA",
-    "NOP",
-    "NOT",
-    "RET",
-    "LSHF",
-    "RSHFL",
-    "RSHFA",
-    "RTI",
-    "STB",
-    "STW",
-    "TRAP",
-    "XOR",
-    "HALT",
-    "BR",
-    "BRN",
-    "BRZ",
-    "BRP",
-    "BRNZ",
-    "BRNP",
-    "BRZP",
-    "BRNZP",
-    "R0",
-    "R1",
-    "R2",
-    "R3",
-    "R4",
-    "R5",
-    "R6",
-    "R7"
+		    "IN",
+		    "OUT",
+		    "GETC",
+		    "PUTS",
+		    ".ORIG",
+		    ".FILL",
+		    ".END",
+		    "ADD",
+		    "AND",
+		    "JMP",
+		    "JSR",
+		    "JSRR",
+		    "LDB",
+		    "LDW",
+		    "LEA",
+		    "NOP",
+		    "NOT",
+		    "RET",
+		    "LSHF",
+		    "RSHFL",
+		    "RSHFA",
+		    "RTI",
+		    "STB",
+		    "STW",
+		    "TRAP",
+		    "XOR",
+		    "HALT",
+		    "BR",
+		    "BRN",
+		    "BRZ",
+		    "BRP",
+		    "BRNZ",
+		    "BRNP",
+		    "BRZP",
+		    "BRNZP",
+		    "R0",
+		    "R1",
+		    "R2",
+		    "R3",
+		    "R4",
+		    "R5",
+		    "R6",
+		    "R7"
 };
 
 /* Valid State Transistions for tokens of an instruction */
@@ -156,45 +163,35 @@ enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] = {
                                     {NOP, IGN, IGN, IGN, IGN}       ,       {LABEL, NOP, IGN, IGN, IGN}
                                 };
 
-enum pFSM pStates[38] = {
-    START,
-    LABEL,
-    ORIG,
-    FILL,
-    END,
-    ADD,
-    AND,
-    JMP,
-    JSR,
-    JSRR,
-    LDB,
-    LDW,
-    LEA,
-    NOP,
-    NOT,
-    RET,
-    LSHF,
-    RSHFL,
-    RSHFA,
-    RTI,
-    STB,
-    STW,
-    TRAP,
-    XOR,
-    HALT,
-    BR,
-    BRN,
-    BRZ,
-    BRP,
-    BRNZ,
-    BRNP,
-    BRZP,
-    BRNZP,
-    INVALID,
-    STOP,
-    REG,
-    IMM,
-    IGN
+const enum pFSM pStates[NUMBER_OF_INSTRUCTIONS_] = {
+						    ADD,
+						    AND,
+						    JMP,
+						    JSR,
+						    JSRR,
+						    LDB,
+						    LDW,
+						    LEA,
+						    NOP,
+						    NOT,
+						    RET,
+						    LSHF,
+						    RSHFL,
+						    RSHFA,
+						    RTI,
+						    STB,
+						    STW,
+						    TRAP,
+						    XOR,
+						    HALT,
+						    BR,
+						    BRN,
+						    BRZ,
+						    BRP,
+						    BRNZ,
+						    BRNP,
+						    BRZP,
+						    BRNZP
 };
 
 /** +
@@ -2116,10 +2113,10 @@ enum pFSM checkInst(char * str) {
     enum pFSM op = INVALID;
 
     if (strlen(str) > 0) {
-        for (int j = 0; j < 28; j++) {
+        for (int j = 0; j < NUMBER_OF_INSTRUCTIONS_; j++) {
             if (strncmp(str, inval[j + 7], strlen(str)) == 0) {
                 if (strlen(str) == strlen(inval[j + 7])) {
-                    op = pStates[j + 5];
+                    op = pStates[j];
                     break;
                 }
             }
@@ -2259,102 +2256,149 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
 
 /** +
  * @fn int firstInstanceofLabel(enum pFSM*, int)
- * @brief
+ * @brief Gives the index of label in the lexeme array of an instruction
  *
- * @param states
- * @param len
- * @return int
+ *     Example : 
+ *     Instruction  :    B    LEA  R1,    A  
+ *     Lexeme array : {LABEL, LEA, REG, LABEL, IGN}
+ *                       ^
+ *                       |
+ *              First Index of Label (j = 0)
+ *
+ * @param states Lexeme array
+ * @param len    Length of lexeme array
+ * @return int   Index of label in lexeme array (if equal to len then not found in given lexeme array)
  */
 int firstInstanceofLabel(enum pFSM * states, int len) {
-    int j = 0;
-    for (; j < len; j++) {
-        if (states[j] == LABEL) break;
-    }
-    return j;
+  int j = 0;
+  for (; j < len; j++) {
+    
+    /* The only valid pFSM state for label lexeme is LABEL */
+    if (states[j] == LABEL) break;
+  }
+  return j;
 }
 
 /** +
  * @fn int firstInstanceofDirective(enum pFSM*, int)
- * @brief
+ * @brief Gives the index of directive in the lexeme array of an instruction
  *
- * @param states
- * @param len
- * @return int
+ *     Example : 
+ *     Instruction  :    A    FILL  x3000
+ *     Lexeme array : {LABEL, FILL,  IMM, IGN, IGN}
+ *                             ^
+ *                             |
+ *                   First Index of Directive (j = 1)
+ *
+ * @param states Lexeme Array
+ * @param len    Length of lexeme array
+ * @return int   Index of directives in lexeme array (if equal to len then not found in given lexeme array)
  */
 int firstInstanceofDirective(enum pFSM * states, int len) {
-    int j = 0;
-    for (; j < len; j++) {
-        if (states[j] == ORIG || states[j] == FILL || states[j] == END) break;
-    }
-    return j;
+  int j = 0;
+  for (; j < len; j++) {
+
+    /* The only allowed pFSM states that can be used as directives are ORIG, FILL and END */
+    if (states[j] == ORIG || states[j] == FILL || states[j] == END) break;
+  }
+  return j;
 }
 
 /** +
  * @fn int firstInstanceofOpcode(enum pFSM*, int)
- * @brief
+ * @brief Gives the index of opcode in the lexeme array of an instruction
  *
- * @param states
- * @param len
- * @return int
+ *     Example : 
+ *     Instruction  :    A    ADD  R3,  R3,  #-1
+ *     Lexeme array : {LABEL, ADD, REG, REG, IMM}
+ *                             ^
+ *                             |
+ *                   First Index of Opcode (j = 1)
+ *
+ * @param states Lexeme Array
+ * @param len    Length of lexeme array
+ * @return int   Index of opcode in lexeme array (if equal to len then not found in given lexeme array)
  */
 int firstInstanceofOpcode(enum pFSM * states, int len) {
     int j = 0;
     for (; j < len; j++) {
         int i = 0;
-        for (; i < 28; i++) {
-            if (states[j] == pStates[i + 5]) break;
-        }
-        if (i != 28) break;
+
+	/* Iterate through pStates (stores lexemes (pFSM states) of all instructions)
+	 * to check if there is a match for any lexeme in the given lexeme array 
+	 */
+        for (; i < NUMBER_OF_INSTRUCTIONS_ ; i++)
+            if (states[j] == pStates[i]) break;
+
+	/* If found than exit loop */
+        if (i != NUMBER_OF_INSTRUCTIONS_) break;
     }
     return j;
 }
 
 /** +
  * @fn int firstInstanceofOperands(enum pFSM*, int)
- * @brief
+ * @brief Gives the index of operands in the lexeme array of an instruction
  *
- * @param states
- * @param len
- * @return int
+ *     Example : 
+ *     Instruction  :    A    ADD  R3,  R3,  #-1
+ *     Lexeme array : {LABEL, ADD, REG, REG, IMM}
+ *                                  ^
+ *                                  |
+ *                   First Index of Operands (j = 2)
+ *                      
+ * @param states Lexeme array
+ * @param len    Length of lexeme array
+ * @return int   Index of operands in lexeme array (if equal to len then not found in given lexeme array)
  */
 int firstInstanceofOperands(enum pFSM * states, int len) {
-    int j = 0;
-    for (; j < len; j++) {
-        if (states[j] == REG || states[j] == IMM || (states[j] == LABEL && j > 0)) break;
-    }
-    return j;
+  int j = 0;
+  for (; j < len; j++) {
+
+    /* pFSM states REG, IMM and LABELS are the only valid lexemes that can be 
+     * used as operands 
+     */
+    if (states[j] == REG || states[j] == IMM || (states[j] == LABEL && j > 0))
+      break;
+  }
+  return j;
 }
 
 /** +
  * @fn int getAddrofLabel(symbol*, int, char*)
- * @brief
+ * @brief Get address of label by searching the symbol table
  *
- * @param sym
- * @param count
- * @param label
- * @return int
+ * @param sym   The symbol table
+ * @param count Number of entries in the symbol table
+ * @param label Label whose address is to be found
+ * @return int  The address of the label (-1 if not found)
  */
 int getAddrofLabel(symbol * sym, int count, char * label) {
-    int addr = -1;
-    for (int j = 0; j < count; j++) {
-        if (strlen(label) == strlen(sym[j].symbolName)) {
-            if (strncmp(label, sym[j].symbolName, strlen(label)) == 0) {
-                addr = sym[j].addr;
-            }
-        }
+  /* Use -1 as default placeholder to indicate missing label in symbol table */
+  int addr = -1;
+
+  /* Iterate through all symbol table entries to find if label exists */
+  for (int j = 0; j < count; j++) {
+    if (strlen(label) == strlen(sym[j].symbolName)) {
+      if (strncmp(label, sym[j].symbolName, strlen(label)) == 0) {
+	addr = sym[j].addr;
+      }
     }
-    return addr;
+  }
+  return addr;
 }
 
 /** +
  * @fn bool checkValidRange(int, int)
- * @brief
+ * @brief Checks if a signed Base10 number (dec) is representable by 
+ *        specified number of bits (numBits)
  *
- * @param dec
- * @param numBytes
- * @return bool
+ * @param dec      Base10 number
+ * @param numBits Specified number of bits
+ * @return bool    
  */
-bool checkValidRange(int dec, int numBytes) {
-    return ((dec <= (pow(2, numBytes - 1) - 1)) && (dec >= -pow(2, numBytes - 1)));
+bool checkValidRange(int dec, int numBits) {
+  /* A signed 5-bit Base10 number can only exist in the closed interval [-2^4, 2^4 - 1] */
+  return ((dec <= (pow(2, numBits - 1) - 1)) && (dec >= -pow(2, numBits - 1)));
 }
 
