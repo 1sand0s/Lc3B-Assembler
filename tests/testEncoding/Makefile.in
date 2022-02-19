@@ -87,8 +87,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = testEncoding$(EXEEXT)
-check_PROGRAMS = testEncoding$(EXEEXT)
+TESTS = testORIG$(EXEEXT) testFILL$(EXEEXT) testEND$(EXEEXT) \
+	testNOP$(EXEEXT) testTRAP$(EXEEXT) testHALT$(EXEEXT) \
+	testADD$(EXEEXT)
+check_PROGRAMS = testORIG$(EXEEXT) testFILL$(EXEEXT) testEND$(EXEEXT) \
+	testNOP$(EXEEXT) testTRAP$(EXEEXT) testHALT$(EXEEXT) \
+	testADD$(EXEEXT)
 subdir = tests/testEncoding
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -99,15 +103,51 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am_testEncoding_OBJECTS = testEncoding-testEncoding.$(OBJEXT)
-testEncoding_OBJECTS = $(am_testEncoding_OBJECTS)
-testEncoding_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+am_testADD_OBJECTS = testADD-testADD.$(OBJEXT)
+testADD_OBJECTS = $(am_testADD_OBJECTS)
+testADD_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-testEncoding_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testEncoding_CFLAGS) \
+testADD_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testADD_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_testEND_OBJECTS = testEND-testEND.$(OBJEXT)
+testEND_OBJECTS = $(am_testEND_OBJECTS)
+testEND_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+testEND_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testEND_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_testFILL_OBJECTS = testFILL-testFILL.$(OBJEXT)
+testFILL_OBJECTS = $(am_testFILL_OBJECTS)
+testFILL_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+testFILL_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testFILL_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_testHALT_OBJECTS = testHALT-testHALT.$(OBJEXT)
+testHALT_OBJECTS = $(am_testHALT_OBJECTS)
+testHALT_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+testHALT_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testHALT_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_testNOP_OBJECTS = testNOP-testNOP.$(OBJEXT)
+testNOP_OBJECTS = $(am_testNOP_OBJECTS)
+testNOP_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+testNOP_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testNOP_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_testORIG_OBJECTS = testORIG-testORIG.$(OBJEXT)
+testORIG_OBJECTS = $(am_testORIG_OBJECTS)
+testORIG_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+testORIG_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testORIG_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_testTRAP_OBJECTS = testTRAP-testTRAP.$(OBJEXT)
+testTRAP_OBJECTS = $(am_testTRAP_OBJECTS)
+testTRAP_DEPENDENCIES = $(top_builddir)/src/libAssembler.la
+testTRAP_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testTRAP_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -124,7 +164,13 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/testEncoding-testEncoding.Po
+am__depfiles_remade = ./$(DEPDIR)/testADD-testADD.Po \
+	./$(DEPDIR)/testEND-testEND.Po \
+	./$(DEPDIR)/testFILL-testFILL.Po \
+	./$(DEPDIR)/testHALT-testHALT.Po \
+	./$(DEPDIR)/testNOP-testNOP.Po \
+	./$(DEPDIR)/testORIG-testORIG.Po \
+	./$(DEPDIR)/testTRAP-testTRAP.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -144,8 +190,12 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(testEncoding_SOURCES)
-DIST_SOURCES = $(testEncoding_SOURCES)
+SOURCES = $(testADD_SOURCES) $(testEND_SOURCES) $(testFILL_SOURCES) \
+	$(testHALT_SOURCES) $(testNOP_SOURCES) $(testORIG_SOURCES) \
+	$(testTRAP_SOURCES)
+DIST_SOURCES = $(testADD_SOURCES) $(testEND_SOURCES) \
+	$(testFILL_SOURCES) $(testHALT_SOURCES) $(testNOP_SOURCES) \
+	$(testORIG_SOURCES) $(testTRAP_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -498,9 +548,41 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-testEncoding_SOURCES = testEncoding.c $(top_builddir)/src/Lc3b-Assembler.h
-testEncoding_CFLAGS = @CHECK_CFLAGS@
-testEncoding_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding ORIG 
+testORIG_SOURCES = testORIG.c $(top_builddir)/src/Lc3b-Assembler.h
+testORIG_CFLAGS = @CHECK_CFLAGS@
+testORIG_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding FILL
+testFILL_SOURCES = testFILL.c $(top_builddir)/src/Lc3b-Assembler.h
+testFILL_CFLAGS = @CHECK_CFLAGS@
+testFILL_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding END
+testEND_SOURCES = testEND.c $(top_builddir)/src/Lc3b-Assembler.h
+testEND_CFLAGS = @CHECK_CFLAGS@
+testEND_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding NOP
+testNOP_SOURCES = testNOP.c $(top_builddir)/src/Lc3b-Assembler.h
+testNOP_CFLAGS = @CHECK_CFLAGS@
+testNOP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding TRAP
+testTRAP_SOURCES = testTRAP.c $(top_builddir)/src/Lc3b-Assembler.h
+testTRAP_CFLAGS = @CHECK_CFLAGS@
+testTRAP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding HALT
+testHALT_SOURCES = testHALT.c $(top_builddir)/src/Lc3b-Assembler.h
+testHALT_CFLAGS = @CHECK_CFLAGS@
+testHALT_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding ADD
+testADD_SOURCES = testADD.c $(top_builddir)/src/Lc3b-Assembler.h
+testADD_CFLAGS = @CHECK_CFLAGS@
+testADD_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
 all: all-am
 
 .SUFFIXES:
@@ -544,9 +626,33 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-testEncoding$(EXEEXT): $(testEncoding_OBJECTS) $(testEncoding_DEPENDENCIES) $(EXTRA_testEncoding_DEPENDENCIES) 
-	@rm -f testEncoding$(EXEEXT)
-	$(AM_V_CCLD)$(testEncoding_LINK) $(testEncoding_OBJECTS) $(testEncoding_LDADD) $(LIBS)
+testADD$(EXEEXT): $(testADD_OBJECTS) $(testADD_DEPENDENCIES) $(EXTRA_testADD_DEPENDENCIES) 
+	@rm -f testADD$(EXEEXT)
+	$(AM_V_CCLD)$(testADD_LINK) $(testADD_OBJECTS) $(testADD_LDADD) $(LIBS)
+
+testEND$(EXEEXT): $(testEND_OBJECTS) $(testEND_DEPENDENCIES) $(EXTRA_testEND_DEPENDENCIES) 
+	@rm -f testEND$(EXEEXT)
+	$(AM_V_CCLD)$(testEND_LINK) $(testEND_OBJECTS) $(testEND_LDADD) $(LIBS)
+
+testFILL$(EXEEXT): $(testFILL_OBJECTS) $(testFILL_DEPENDENCIES) $(EXTRA_testFILL_DEPENDENCIES) 
+	@rm -f testFILL$(EXEEXT)
+	$(AM_V_CCLD)$(testFILL_LINK) $(testFILL_OBJECTS) $(testFILL_LDADD) $(LIBS)
+
+testHALT$(EXEEXT): $(testHALT_OBJECTS) $(testHALT_DEPENDENCIES) $(EXTRA_testHALT_DEPENDENCIES) 
+	@rm -f testHALT$(EXEEXT)
+	$(AM_V_CCLD)$(testHALT_LINK) $(testHALT_OBJECTS) $(testHALT_LDADD) $(LIBS)
+
+testNOP$(EXEEXT): $(testNOP_OBJECTS) $(testNOP_DEPENDENCIES) $(EXTRA_testNOP_DEPENDENCIES) 
+	@rm -f testNOP$(EXEEXT)
+	$(AM_V_CCLD)$(testNOP_LINK) $(testNOP_OBJECTS) $(testNOP_LDADD) $(LIBS)
+
+testORIG$(EXEEXT): $(testORIG_OBJECTS) $(testORIG_DEPENDENCIES) $(EXTRA_testORIG_DEPENDENCIES) 
+	@rm -f testORIG$(EXEEXT)
+	$(AM_V_CCLD)$(testORIG_LINK) $(testORIG_OBJECTS) $(testORIG_LDADD) $(LIBS)
+
+testTRAP$(EXEEXT): $(testTRAP_OBJECTS) $(testTRAP_DEPENDENCIES) $(EXTRA_testTRAP_DEPENDENCIES) 
+	@rm -f testTRAP$(EXEEXT)
+	$(AM_V_CCLD)$(testTRAP_LINK) $(testTRAP_OBJECTS) $(testTRAP_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -554,7 +660,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testEncoding-testEncoding.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testADD-testADD.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testEND-testEND.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testFILL-testFILL.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testHALT-testHALT.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNOP-testNOP.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testORIG-testORIG.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTRAP-testTRAP.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -583,19 +695,103 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-testEncoding-testEncoding.o: testEncoding.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEncoding_CFLAGS) $(CFLAGS) -MT testEncoding-testEncoding.o -MD -MP -MF $(DEPDIR)/testEncoding-testEncoding.Tpo -c -o testEncoding-testEncoding.o `test -f 'testEncoding.c' || echo '$(srcdir)/'`testEncoding.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testEncoding-testEncoding.Tpo $(DEPDIR)/testEncoding-testEncoding.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testEncoding.c' object='testEncoding-testEncoding.o' libtool=no @AMDEPBACKSLASH@
+testADD-testADD.o: testADD.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testADD_CFLAGS) $(CFLAGS) -MT testADD-testADD.o -MD -MP -MF $(DEPDIR)/testADD-testADD.Tpo -c -o testADD-testADD.o `test -f 'testADD.c' || echo '$(srcdir)/'`testADD.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testADD-testADD.Tpo $(DEPDIR)/testADD-testADD.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testADD.c' object='testADD-testADD.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEncoding_CFLAGS) $(CFLAGS) -c -o testEncoding-testEncoding.o `test -f 'testEncoding.c' || echo '$(srcdir)/'`testEncoding.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testADD_CFLAGS) $(CFLAGS) -c -o testADD-testADD.o `test -f 'testADD.c' || echo '$(srcdir)/'`testADD.c
 
-testEncoding-testEncoding.obj: testEncoding.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEncoding_CFLAGS) $(CFLAGS) -MT testEncoding-testEncoding.obj -MD -MP -MF $(DEPDIR)/testEncoding-testEncoding.Tpo -c -o testEncoding-testEncoding.obj `if test -f 'testEncoding.c'; then $(CYGPATH_W) 'testEncoding.c'; else $(CYGPATH_W) '$(srcdir)/testEncoding.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testEncoding-testEncoding.Tpo $(DEPDIR)/testEncoding-testEncoding.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testEncoding.c' object='testEncoding-testEncoding.obj' libtool=no @AMDEPBACKSLASH@
+testADD-testADD.obj: testADD.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testADD_CFLAGS) $(CFLAGS) -MT testADD-testADD.obj -MD -MP -MF $(DEPDIR)/testADD-testADD.Tpo -c -o testADD-testADD.obj `if test -f 'testADD.c'; then $(CYGPATH_W) 'testADD.c'; else $(CYGPATH_W) '$(srcdir)/testADD.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testADD-testADD.Tpo $(DEPDIR)/testADD-testADD.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testADD.c' object='testADD-testADD.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEncoding_CFLAGS) $(CFLAGS) -c -o testEncoding-testEncoding.obj `if test -f 'testEncoding.c'; then $(CYGPATH_W) 'testEncoding.c'; else $(CYGPATH_W) '$(srcdir)/testEncoding.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testADD_CFLAGS) $(CFLAGS) -c -o testADD-testADD.obj `if test -f 'testADD.c'; then $(CYGPATH_W) 'testADD.c'; else $(CYGPATH_W) '$(srcdir)/testADD.c'; fi`
+
+testEND-testEND.o: testEND.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEND_CFLAGS) $(CFLAGS) -MT testEND-testEND.o -MD -MP -MF $(DEPDIR)/testEND-testEND.Tpo -c -o testEND-testEND.o `test -f 'testEND.c' || echo '$(srcdir)/'`testEND.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testEND-testEND.Tpo $(DEPDIR)/testEND-testEND.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testEND.c' object='testEND-testEND.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEND_CFLAGS) $(CFLAGS) -c -o testEND-testEND.o `test -f 'testEND.c' || echo '$(srcdir)/'`testEND.c
+
+testEND-testEND.obj: testEND.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEND_CFLAGS) $(CFLAGS) -MT testEND-testEND.obj -MD -MP -MF $(DEPDIR)/testEND-testEND.Tpo -c -o testEND-testEND.obj `if test -f 'testEND.c'; then $(CYGPATH_W) 'testEND.c'; else $(CYGPATH_W) '$(srcdir)/testEND.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testEND-testEND.Tpo $(DEPDIR)/testEND-testEND.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testEND.c' object='testEND-testEND.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testEND_CFLAGS) $(CFLAGS) -c -o testEND-testEND.obj `if test -f 'testEND.c'; then $(CYGPATH_W) 'testEND.c'; else $(CYGPATH_W) '$(srcdir)/testEND.c'; fi`
+
+testFILL-testFILL.o: testFILL.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testFILL_CFLAGS) $(CFLAGS) -MT testFILL-testFILL.o -MD -MP -MF $(DEPDIR)/testFILL-testFILL.Tpo -c -o testFILL-testFILL.o `test -f 'testFILL.c' || echo '$(srcdir)/'`testFILL.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testFILL-testFILL.Tpo $(DEPDIR)/testFILL-testFILL.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testFILL.c' object='testFILL-testFILL.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testFILL_CFLAGS) $(CFLAGS) -c -o testFILL-testFILL.o `test -f 'testFILL.c' || echo '$(srcdir)/'`testFILL.c
+
+testFILL-testFILL.obj: testFILL.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testFILL_CFLAGS) $(CFLAGS) -MT testFILL-testFILL.obj -MD -MP -MF $(DEPDIR)/testFILL-testFILL.Tpo -c -o testFILL-testFILL.obj `if test -f 'testFILL.c'; then $(CYGPATH_W) 'testFILL.c'; else $(CYGPATH_W) '$(srcdir)/testFILL.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testFILL-testFILL.Tpo $(DEPDIR)/testFILL-testFILL.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testFILL.c' object='testFILL-testFILL.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testFILL_CFLAGS) $(CFLAGS) -c -o testFILL-testFILL.obj `if test -f 'testFILL.c'; then $(CYGPATH_W) 'testFILL.c'; else $(CYGPATH_W) '$(srcdir)/testFILL.c'; fi`
+
+testHALT-testHALT.o: testHALT.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testHALT_CFLAGS) $(CFLAGS) -MT testHALT-testHALT.o -MD -MP -MF $(DEPDIR)/testHALT-testHALT.Tpo -c -o testHALT-testHALT.o `test -f 'testHALT.c' || echo '$(srcdir)/'`testHALT.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testHALT-testHALT.Tpo $(DEPDIR)/testHALT-testHALT.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testHALT.c' object='testHALT-testHALT.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testHALT_CFLAGS) $(CFLAGS) -c -o testHALT-testHALT.o `test -f 'testHALT.c' || echo '$(srcdir)/'`testHALT.c
+
+testHALT-testHALT.obj: testHALT.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testHALT_CFLAGS) $(CFLAGS) -MT testHALT-testHALT.obj -MD -MP -MF $(DEPDIR)/testHALT-testHALT.Tpo -c -o testHALT-testHALT.obj `if test -f 'testHALT.c'; then $(CYGPATH_W) 'testHALT.c'; else $(CYGPATH_W) '$(srcdir)/testHALT.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testHALT-testHALT.Tpo $(DEPDIR)/testHALT-testHALT.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testHALT.c' object='testHALT-testHALT.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testHALT_CFLAGS) $(CFLAGS) -c -o testHALT-testHALT.obj `if test -f 'testHALT.c'; then $(CYGPATH_W) 'testHALT.c'; else $(CYGPATH_W) '$(srcdir)/testHALT.c'; fi`
+
+testNOP-testNOP.o: testNOP.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testNOP_CFLAGS) $(CFLAGS) -MT testNOP-testNOP.o -MD -MP -MF $(DEPDIR)/testNOP-testNOP.Tpo -c -o testNOP-testNOP.o `test -f 'testNOP.c' || echo '$(srcdir)/'`testNOP.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testNOP-testNOP.Tpo $(DEPDIR)/testNOP-testNOP.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testNOP.c' object='testNOP-testNOP.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testNOP_CFLAGS) $(CFLAGS) -c -o testNOP-testNOP.o `test -f 'testNOP.c' || echo '$(srcdir)/'`testNOP.c
+
+testNOP-testNOP.obj: testNOP.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testNOP_CFLAGS) $(CFLAGS) -MT testNOP-testNOP.obj -MD -MP -MF $(DEPDIR)/testNOP-testNOP.Tpo -c -o testNOP-testNOP.obj `if test -f 'testNOP.c'; then $(CYGPATH_W) 'testNOP.c'; else $(CYGPATH_W) '$(srcdir)/testNOP.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testNOP-testNOP.Tpo $(DEPDIR)/testNOP-testNOP.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testNOP.c' object='testNOP-testNOP.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testNOP_CFLAGS) $(CFLAGS) -c -o testNOP-testNOP.obj `if test -f 'testNOP.c'; then $(CYGPATH_W) 'testNOP.c'; else $(CYGPATH_W) '$(srcdir)/testNOP.c'; fi`
+
+testORIG-testORIG.o: testORIG.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testORIG_CFLAGS) $(CFLAGS) -MT testORIG-testORIG.o -MD -MP -MF $(DEPDIR)/testORIG-testORIG.Tpo -c -o testORIG-testORIG.o `test -f 'testORIG.c' || echo '$(srcdir)/'`testORIG.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testORIG-testORIG.Tpo $(DEPDIR)/testORIG-testORIG.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testORIG.c' object='testORIG-testORIG.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testORIG_CFLAGS) $(CFLAGS) -c -o testORIG-testORIG.o `test -f 'testORIG.c' || echo '$(srcdir)/'`testORIG.c
+
+testORIG-testORIG.obj: testORIG.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testORIG_CFLAGS) $(CFLAGS) -MT testORIG-testORIG.obj -MD -MP -MF $(DEPDIR)/testORIG-testORIG.Tpo -c -o testORIG-testORIG.obj `if test -f 'testORIG.c'; then $(CYGPATH_W) 'testORIG.c'; else $(CYGPATH_W) '$(srcdir)/testORIG.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testORIG-testORIG.Tpo $(DEPDIR)/testORIG-testORIG.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testORIG.c' object='testORIG-testORIG.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testORIG_CFLAGS) $(CFLAGS) -c -o testORIG-testORIG.obj `if test -f 'testORIG.c'; then $(CYGPATH_W) 'testORIG.c'; else $(CYGPATH_W) '$(srcdir)/testORIG.c'; fi`
+
+testTRAP-testTRAP.o: testTRAP.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testTRAP_CFLAGS) $(CFLAGS) -MT testTRAP-testTRAP.o -MD -MP -MF $(DEPDIR)/testTRAP-testTRAP.Tpo -c -o testTRAP-testTRAP.o `test -f 'testTRAP.c' || echo '$(srcdir)/'`testTRAP.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testTRAP-testTRAP.Tpo $(DEPDIR)/testTRAP-testTRAP.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testTRAP.c' object='testTRAP-testTRAP.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testTRAP_CFLAGS) $(CFLAGS) -c -o testTRAP-testTRAP.o `test -f 'testTRAP.c' || echo '$(srcdir)/'`testTRAP.c
+
+testTRAP-testTRAP.obj: testTRAP.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testTRAP_CFLAGS) $(CFLAGS) -MT testTRAP-testTRAP.obj -MD -MP -MF $(DEPDIR)/testTRAP-testTRAP.Tpo -c -o testTRAP-testTRAP.obj `if test -f 'testTRAP.c'; then $(CYGPATH_W) 'testTRAP.c'; else $(CYGPATH_W) '$(srcdir)/testTRAP.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testTRAP-testTRAP.Tpo $(DEPDIR)/testTRAP-testTRAP.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testTRAP.c' object='testTRAP-testTRAP.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testTRAP_CFLAGS) $(CFLAGS) -c -o testTRAP-testTRAP.obj `if test -f 'testTRAP.c'; then $(CYGPATH_W) 'testTRAP.c'; else $(CYGPATH_W) '$(srcdir)/testTRAP.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -796,9 +992,51 @@ recheck: all $(check_PROGRAMS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-testEncoding.log: testEncoding$(EXEEXT)
-	@p='testEncoding$(EXEEXT)'; \
-	b='testEncoding'; \
+testORIG.log: testORIG$(EXEEXT)
+	@p='testORIG$(EXEEXT)'; \
+	b='testORIG'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testFILL.log: testFILL$(EXEEXT)
+	@p='testFILL$(EXEEXT)'; \
+	b='testFILL'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testEND.log: testEND$(EXEEXT)
+	@p='testEND$(EXEEXT)'; \
+	b='testEND'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testNOP.log: testNOP$(EXEEXT)
+	@p='testNOP$(EXEEXT)'; \
+	b='testNOP'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testTRAP.log: testTRAP$(EXEEXT)
+	@p='testTRAP$(EXEEXT)'; \
+	b='testTRAP'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testHALT.log: testHALT$(EXEEXT)
+	@p='testHALT$(EXEEXT)'; \
+	b='testHALT'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testADD.log: testADD$(EXEEXT)
+	@p='testADD$(EXEEXT)'; \
+	b='testADD'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -896,7 +1134,13 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/testEncoding-testEncoding.Po
+		-rm -f ./$(DEPDIR)/testADD-testADD.Po
+	-rm -f ./$(DEPDIR)/testEND-testEND.Po
+	-rm -f ./$(DEPDIR)/testFILL-testFILL.Po
+	-rm -f ./$(DEPDIR)/testHALT-testHALT.Po
+	-rm -f ./$(DEPDIR)/testNOP-testNOP.Po
+	-rm -f ./$(DEPDIR)/testORIG-testORIG.Po
+	-rm -f ./$(DEPDIR)/testTRAP-testTRAP.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -942,7 +1186,13 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/testEncoding-testEncoding.Po
+		-rm -f ./$(DEPDIR)/testADD-testADD.Po
+	-rm -f ./$(DEPDIR)/testEND-testEND.Po
+	-rm -f ./$(DEPDIR)/testFILL-testFILL.Po
+	-rm -f ./$(DEPDIR)/testHALT-testHALT.Po
+	-rm -f ./$(DEPDIR)/testNOP-testNOP.Po
+	-rm -f ./$(DEPDIR)/testORIG-testORIG.Po
+	-rm -f ./$(DEPDIR)/testTRAP-testTRAP.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
