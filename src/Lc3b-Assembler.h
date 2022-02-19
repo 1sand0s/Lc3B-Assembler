@@ -136,6 +136,7 @@ enum pFSM checkInst(char * );
 enum pFSM checkRegister(char * );
 enum pFSM checkImmidiate(char ** );
 enum errorCode integrityCheck(char ** * , int * , enum pFSM ** );
+int matchLexemes(const enum pFSM *, const enum pFSM *, int);
 /************************************************************************************************/
 
 

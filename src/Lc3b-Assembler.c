@@ -2329,7 +2329,6 @@ void convertTokens(char ** * tokens, int * count, enum pFSM ** stateTransition) 
  * @return errorCode       Error if the instruction is invalid
  */
 enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateTransition) {
-  bool flag;
 
   /* Convert tokens(stored as char*) into lexemes(stored as enum pFSM) */
   convertTokens(tokens, count, stateTransition);
@@ -2337,65 +2336,82 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
   /* Check if lexeme array matches any pattern in pTransitions (list of valid lexeme sequences
    * for all instructions in the Lc3b ISA)
    */
-  for (int i = 0; i < MAX_VALID_COMBINATIONS_; i++) {
-    flag = true;
-    int j = 0;
-    
-    for (; j < *count; j++) {
-      flag &= ((*stateTransition)[j] == pTransitions[i][j]);
+  for (int i = 0; i < MAX_VALID_COMBINATIONS_; i++)
+
+    /* Match lexeme array with valid patterns */
+    if(matchLexemes(pTransitions[i], *stateTransition, *count) == *count){
+
+      /* If the two arrays agree with each other up to *count then match may still be partial 
+       *
+       *        Example : 
+       *        Instruction             :    A    ADD   R1, R1
+       *        Lexeme Array            : {LABEL, ADD, REG, REG}
+       *        Partial Matching Pattern: {LABEL, ADD, REG, REG, REG/IMM}
+       *                                                           ^
+       *                                                           |
+       *                                               Missing operand so still invalid
+       *                                               despite partial match
+       *
+       */
+      if(*count < MAX_INSTRUCTION_LENGTH_){
+
+	/* Check if the lexeme following the last matched index is IGN (Ignorable) */
+	if(pTransitions[i][*count] == IGN)
+	  return OK_VALID;
+      }
+
+      /* If index of mismatch between the two arrays is equal to MAX_INSTRUCTION_LENGTH_ then 
+       * the lexeme array must correspond to a valid instruction so return valid
+       */
+      else
+	return OK_VALID;
     }
 
-    /* Even if flag is true the match may still be partial 
-     *
-     *        Example : 
-     *        Instruction             :    A    ADD   R1, R1
-     *        Lexeme Array            : {LABEL, ADD, REG, REG}
-     *        Partial Matching Pattern: {LABEL, ADD, REG, REG, REG/IMM}
-     *                                                           ^
-     *                                                           |
-     *                                               Missing operand so still invalid
-     *                                               despite partial match
-     *
-     */
-    if (flag) {
+  /* If lexeme array not matched in valid patterns then find type of error */
+  /* Get index in lexeme array where operands first appear */
+  int i = firstInstanceofOperands(*stateTransition,
+				  *count);
 
-      /* If there is partial match then check if next lexeme in pTransitions is IGN (ignore) */
-      flag &= (j < MAX_INSTRUCTION_LENGTH_ ? (pTransitions[i][j] == IGN) : flag);
-
-      /* If flag is still true then the instruction is valid*/
-      if (flag)
-	break;
-    }
-  }
-
-  /* If flag is false then identify type of error */
-  if (!flag) {
-
-    /* Get index in lexeme array where operands first appear */
-    int i = firstInstanceofOperands(*stateTransition,
-				    *count);
-
-    /* If operands appear at 0th index then 
-     * Operands must follow opcode/directive
-     */
-    if (i == 0) 
-      return INVALID_OPCODE;
-    
-    /* If label appears immediately before operands then
-     * Labels can only appear at the beginning of an instruction or at the end
-     */
-    else if ((*stateTransition)[i - 1] == LABEL)
-      return INVALID_OPCODE;
-    else
-      return OTHER_ERROR;
-  }
-#ifdef Debug_Print
-  if (flag)
-    printf("True\n");
+  /* If operands appear at 0th index then return INVALID_OPCODE since
+   * operands must follow opcode/directive
+   */
+  if (i == 0) 
+    return INVALID_OPCODE;
+  
+  /* If label appears immediately before operands then return INVALID_OPCODE since
+   * labels can only appear at the beginning of an instruction or at the end
+   */
+  else if ((*stateTransition)[i - 1] == LABEL)
+    return INVALID_OPCODE;
   else
-    printf("False\n");
-#endif
-  return OK_VALID;
+    return OTHER_ERROR;
+}
+
+/** +
+ * @fn int matchLexemes(enum pFSM*, enum pFSM*, int)
+ * @brief Gives the index of the first mismatch between two lexeme arrays
+ *
+ *     Example :   
+ *     Lexeme array1 : {LABEL, LEA, REG, LABEL, IGN}
+ *     Lexeme array2 : {LABEL, ADD, REG, REG,   IMM}
+ *                              ^
+ *                              |
+ *                  Index of first mismatch (index = 1)
+ *
+ * @param lArray1 Lexeme array 1
+ * @param lArray2 Lexeme array 2
+ * @param count   Length of the lexeme arrays (the arrays must be of same length)
+ * @return int    Index of first mismatch (if equal to count then the two arrays are identical 
+ *                w.r.t to lexemes)
+ */
+int matchLexemes(const enum pFSM * lArray1, const enum pFSM * lArray2, int count){
+  /* Index of mismatch , should be count if no mismatch and lexeme arrays are equal */
+  int index = -1;
+
+  /* Iterate and compare the lexeme arrays */
+  while((index++ < (count-1)) && (*lArray1++ == *lArray2++));
+
+  return index;
 }
 
 /** +
