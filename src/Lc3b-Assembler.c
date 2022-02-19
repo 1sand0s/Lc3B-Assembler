@@ -2263,6 +2263,52 @@ enum pFSM checkImmidiate(char ** str) {
 }
 
 /** +
+ * @fn void convertTokens(char***, int*, enum pFSM**, int*)
+ * @brief Converts tokens into corresponding lexemes
+ *
+ *        Example :
+ *        Instruction :   A      LEA    R1,     B
+ *        Tokens      : {"A",   "LEA", "R1",   "B"}
+ *        Lexeme Array: {LABEL,  LEA,   REG,  LABEL} 
+ *
+ *       
+ *
+ * @param tokens           Tokens after parsing a line containing an instruction
+ * @param count            Number of tokens
+ * @param stateTransition  Corresponding lexeme array (must be freed by the caller)
+ */
+void convertTokens(char ** * tokens, int * count, enum pFSM ** stateTransition) {
+  int step = 0;
+  enum pFSM state = START;
+
+  /* Allocate memory to lexeme array */
+  *stateTransition = calloc(*count, sizeof(enum pFSM));
+
+  /* Iterate through tokens and convert to corresponding lexemes */
+  while (step < *count) {
+
+    /* Check if current token is a LABEL */
+    state = checkLabel(*((*tokens) + step));
+
+    /* Check if current token is a Directive (ORIG, FILL, END) */
+    state = state == INVALID ? checkDirective(*((*tokens) + step)) : state;
+
+    /* Check if current token is an opcode (any lexeme in pOpcodes) */
+    state = state == INVALID ? checkInst(*((*tokens) + step)) : state;
+
+    /* Check if current token is a register operand (REG) */
+    state = state == INVALID ? checkRegister(*((*tokens) + step)) : state;
+
+    /* Check if current token is an immediate operand (IMM) */
+    state = state == INVALID ? checkImmidiate(((*tokens) + step)) : state;
+
+    /* Assign state to current index of lexeme array */
+    *((*stateTransition) + step) = state;
+    step++;
+  }
+}
+
+/** +
  * @fn enum errorCode integrityCheck(char***, int*, enum pFSM**)
  * @brief Checks the integerity of an instruction by converting its tokens
  *        into corresponding lexemes and comparing them with list of valid
@@ -2283,54 +2329,19 @@ enum pFSM checkImmidiate(char ** str) {
  * @return errorCode       Error if the instruction is invalid
  */
 enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateTransition) {
-  int step = 0;
   bool flag;
-  enum pFSM state = START;
 
-  /* Allocate memory to lexeme array */
-  *stateTransition = malloc(sizeof(enum pFSM));
-
-  /* Iterate through tokens and convert to corresponding lexemes */
-  while (step < *count) {
-    *stateTransition = realloc(*stateTransition,
-			       (step + 1) * sizeof(enum pFSM));
-
-    /* Check if current token is a LABEL */
-    state = checkLabel((*tokens)[step]);
-
-    /* Check if current token is a Directive (ORIG, FILL, END) */
-    state = state == INVALID ? checkDirective((*tokens)[step]) : state;
-
-    /* Check if current token is an opcode (any lexeme in pOpcodes) */
-    state = state == INVALID ? checkInst((*tokens)[step]) : state;
-
-    /* Check if current token is a register operand (REG) */
-    state = state == INVALID ? checkRegister((*tokens)[step]) : state;
-
-    /* Check if current token is an immediate operand (IMM) */
-    state = state == INVALID ? checkImmidiate(&((*tokens)[step])) : state;
-
-    /* Assign state to current index of lexeme array */
-    (*stateTransition)[step] = state;
-    
-    if (state == TRAP) {
-      if (step < *count) {
-	if (!isValidHex((*tokens)[step + 1])) {
-	  return INVALID_CONSTANT;
-	}
-      }
-    }
-    step++;
-  }
-
-  /* Check if lexeme array matches pattern in pTransitions (list of valid lexeme sequences
+  /* Convert tokens(stored as char*) into lexemes(stored as enum pFSM) */
+  convertTokens(tokens, count, stateTransition);
+  
+  /* Check if lexeme array matches any pattern in pTransitions (list of valid lexeme sequences
    * for all instructions in the Lc3b ISA)
    */
   for (int i = 0; i < MAX_VALID_COMBINATIONS_; i++) {
     flag = true;
     int j = 0;
     
-    for (; j < step; j++) {
+    for (; j < *count; j++) {
       flag &= ((*stateTransition)[j] == pTransitions[i][j]);
     }
 
@@ -2362,7 +2373,7 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
 
     /* Get index in lexeme array where operands first appear */
     int i = firstInstanceofOperands(*stateTransition,
-				    step);
+				    *count);
 
     /* If operands appear at 0th index then 
      * Operands must follow opcode/directive
