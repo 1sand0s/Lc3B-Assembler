@@ -1919,43 +1919,9 @@ void lexer(char * line, char ** * tokens, int * len) {
 int hex2dec(char * str) {
   /* INT_MAX used as default placeholder to indicate invalid hex string */
   int dec = INT_MAX;
-  bool valid = true;
-
-  /* All valid hex strings are represented as follows
-   *
-   *    Descriptor |  Value
-   *        X      |  3000
-   *        X      |  3050
-   * 
-   * Therefore all hex strings must have atleast 2 characters ("X" and the value)
-   */
-  if (strlen(str) >= 2) {
-    
-    /* Expect descriptor at 0th index to be 'X' since 'lexer' converts all 
-     * extracted tokens to uppercase for uniformity
-     */
-    if (str[0] == 'X') {
       
-      /* Iterate through characters to make sure hex string is valid */
-      for (int i = 1; i < strlen(str); i++) {
-
-	/* checks if a digit is 0-9 or A-F */
-	if (!isxdigit(str[i])) {
-	  
-	  /* If not digit and is '-' or '+' then it can only occur 
-	   * immediately after 'X'/ 1st index for hex string to be valid
-	   */
-	  if (!((str[i] == '-' || str[i] == '+') && i == 1)) {
-	    valid = false;
-	    break;
-	  }
-	}
-      }
-      
-      /* If valid then convert to equivalent Base10 number */
-      dec = valid ? strtol((str + 1), NULL, 16) : dec;
-    }
-  }
+  /* If valid then convert to equivalent Base10 number */
+  dec = isValidBase16(str) ? strtol((str + 1), NULL, 16) : dec;
   return dec;
 }
 
@@ -2049,7 +2015,7 @@ char * dec2dec(int dec) {
  * @return int
  */
 int dec2dec2(char * dec) {
-    if (isValidDec(dec))
+    if (isValidBase10(dec))
         return strtol((dec + 1), NULL, 10);
     else
         return INT_MAX;
@@ -2071,52 +2037,95 @@ char * int2str(int dec) {
 }
 
 /** +
- * @fn bool isValidHex(char*)
- * @brief CHeck if Base16/hex string is a valid Base16 number
- *
- * @param str
- * @return bool
+ * @fn bool isValidBase16(char*)
+ * @brief Check if Base16/hex string is a valid Base16 number
+ *       
+ * @param str   Base16 string whose validity is to be confirmed
+ * @return bool The validity of the Base16 string
  */
-bool isValidHex(char * str) {
+bool isValidBase16(char * str) {
+   /* Flag to store validity of the input string */
+  bool valid = false;
+  int strLength = strlen(str);
 
-    bool valid = false;
+  /* All valid Base16 strings are represented as follows
+   *
+   *    Descriptor |  Value
+   *        X      |  3000
+   *        X      |  -3050
+   * 
+   * Therefore all Base16 strings must have atleast 2 characters ("X" and the value)
+   */
+  if (strLength >= 2) {
+    valid = true;
 
-    if (strlen(str) >= 2) {
-        if (str[0] == 'X') {
-            if (hex2dec(str) != INT_MAX)
-                valid = true;
-        }
-    }
-
-    return valid;
+    /* Iterate through characters to make sure hex string is valid */
+    for(int j = 0; j < strLength; j++)
+      
+      switch(j){
+      case 0:
+	/* The 0th index/first character of a valid Base16 string must contain 'X' */
+	valid &= (str[j] == 'X');
+	break;
+	
+      case 1:
+	/* The 1st index/second character can either be a hex digit or sign <+/-> */
+	valid &= (str[j] == '+' || str[j] == '-' || (isxdigit(str[j]) != 0));
+	break;
+	  
+      default :
+	/* The remaining indices must all be hex digits for a valid Base16 string */
+	valid &= (isxdigit(str[j]) != 0);
+	break;
+      }
+  }
+  return valid;
 }
 
 /** +
- * @fn bool isValidDec(char*)
+ * @fn bool isValidBase10(char*)
  * @brief Check if a Base10 string is a valid Base10 number
  *
- * @param str
- * @return bool
+ * @param str   The Base10 string to check for validity
+ * @return bool The validity of the input string str
  */
-bool isValidDec(char * str) {
+bool isValidBase10(char * str) {
+  /* Flag to store validity of the input string */
+  bool valid = false;
+  int strLength = strlen(str);
 
-    bool valid = false;
-
-    if (str[0] == '#') {
-        for (int j = 1; j < strlen(str); j++) {
-            if (isdigit(str[j]) == 0) {
-                if (((str[j] == '-' || str[j] == '+') && j == 1)) {
-                    valid = true;
-                } else {
-                    valid = true;
-                    break;
-                }
-            }
-            valid = true;
-        }
-    }
-
-    return valid;
+  /* All valid Base10 strings are represented as follows
+   *
+   *    Descriptor |  Value
+   *        #      |  10
+   *        #      |  -1
+   * 
+   * Therefore all Base10 strings must have atleast 2 characters ("#" and the value)
+   */
+  if(strLength >= 2){
+    valid = true;
+    
+    /* Iterate through characters of str to check validity */
+    for(int j = 0; j < strLength; j++)
+      
+      switch(j){
+      case 0:
+	/* The 0th index/first character of a valid Base10 string must contain '#' */
+	valid &= (str[j] == '#');
+	break;
+	
+      case 1:
+	/* The 1st index/second character can either be a digit or sign <+/-> */
+	valid &= (str[j] == '+' || str[j] == '-' || (isdigit(str[j]) != 0));
+	break;
+	
+      default :
+	/* The remaining indices must all be digits for a valid Base10 string */
+	valid &= (isdigit(str[j]) != 0);
+	break;
+      }
+  } 
+  return valid;
 }
 
 /** +
@@ -2155,20 +2164,17 @@ enum pFSM checkLabel(char * str) {
  */
 enum pFSM checkDirective(char * str) {
   enum pFSM op = INVALID;
-  if (strlen(str) > 0) {
+  if (strlen(str) > 0) 
 
     /* Iterate through valid directive names given in directives variable
      * to find a match
      */
-    for (int j = 0; j < NUMBER_OF_DIRECTIVES_; j++) {
-      if (strncmp(str, directives[j], strlen(str)) == 0) {
+    for (int j = 0; j < NUMBER_OF_DIRECTIVES_; j++)
+      if (strncmp(str, directives[j], strlen(str)) == 0)
 	if (strlen(str) == strlen(directives[j])) {
 	  op = pDirectives[j];
 	  break;
 	}
-      }
-    }
-  }
   return op;
 }
 
@@ -2181,20 +2187,17 @@ enum pFSM checkDirective(char * str) {
  */
 enum pFSM checkInst(char * str) {
   enum pFSM op = INVALID;
-  if (strlen(str) > 0) {
+  if (strlen(str) > 0)
     
     /* Iterate through valid opcode names given in opcodes variable
      * to find a match
      */
-    for (int j = 0; j < NUMBER_OF_INSTRUCTIONS_; j++) {
-      if (strncmp(str, opcodes[j], strlen(str)) == 0) {
+    for (int j = 0; j < NUMBER_OF_INSTRUCTIONS_; j++)
+      if (strncmp(str, opcodes[j], strlen(str)) == 0)
 	if (strlen(str) == strlen(opcodes[j])) {
 	  op = pOpcodes[j];
 	  break;
 	}
-      }
-    }
-  }
   return op;
 }
 
@@ -2211,20 +2214,17 @@ enum pFSM checkRegister(char * str) {
   /* A register name must contain exactly two characters
    * [R][0-7]
    */
-  if (strlen(str) == 2) {
+  if (strlen(str) == 2)
 
     /* Iterate through valid register names given in regs variable
      * to find a match
      */
-    for (int j = 0; j < NUMBER_OF_REGISTERS_; j++) {
-      if (strncmp(str, regs[j], strlen(str)) == 0) {
+    for (int j = 0; j < NUMBER_OF_REGISTERS_; j++)
+      if (strncmp(str, regs[j], strlen(str)) == 0)
 	if (strlen(str) == strlen(regs[j])) {
 	  op = REG;
 	  break;
 	}
-      }
-    }
-  }
   return op;
 }
 
@@ -2246,7 +2246,7 @@ enum pFSM checkImmidiate(char ** str) {
   if (strlen( * str) >= 2) {
 
     /* If immediate is a hex string then convert to Base10 string */
-    if (isValidHex( * str)) {
+    if (isValidBase16( * str)) {
       int dec = hex2dec( * str);
       free( * str);
       * str = int2str(dec);
@@ -2255,9 +2255,8 @@ enum pFSM checkImmidiate(char ** str) {
       prepend(str, "#");
       op = IMM;
     }
-    else if (isValidDec( * str)) {
+    else if (isValidBase10( * str))
       op = IMM;
-    }
   }
   return op;
 }
