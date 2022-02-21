@@ -520,7 +520,7 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
 		if (errorp == OK_VALID) {
 		  if (stateT[0] == ORIG) {
 		    state = PSTART;
-		    startAddr = dec2dec(dec2dec2(tokens[1]));
+		    startAddr = Base10Number2String(Base10String2Number(tokens[1]));
 		    insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, 0, startAddr);
 		  }
 		  else {
@@ -624,7 +624,7 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
             strncpy(( * symbolTable)[j].symbolName, label, (size_t)(strlen(label) + 1));
 
             /* Copy address(base10) into symbol table */
-            ( * symbolTable)[j].addr = dec2dec2(startAddr) + (line - 1) * 2;
+            ( * symbolTable)[j].addr = Base10String2Number(startAddr) + (line - 1) * 2;
             * tableCount = ( * tableCount) + 1;
         }
     }
@@ -636,7 +636,7 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
         strncpy(( * symbolTable)[0].symbolName, label, (size_t)(strlen(label) + 1));
 
         /* Copy address(base10) into symbol table */
-        ( * symbolTable)[0].addr = dec2dec2(startAddr) + (line - 1) * 2;
+        ( * symbolTable)[0].addr = Base10String2Number(startAddr) + (line - 1) * 2;
         * tableCount = ( * tableCount) + 1;
     }
 }
@@ -712,7 +712,7 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
 
     /* Copy instruction address into instruction table */
     if (startAddr != NULL) {
-        ( * instructionTable)[ * tableCount].addr = dec2dec2(startAddr) + line * 2;
+        ( * instructionTable)[ * tableCount].addr = Base10String2Number(startAddr) + line * 2;
     }
     * tableCount = * tableCount + 1;
 }
@@ -1995,45 +1995,52 @@ char * dec2bin(int dec) {
 }
 
 /** +
- * @fn char dec2dec*(int)
+ * @fn char * Base10Number2String(int)
  * @brief Convert Base10 number into Base10 string
  *
- * @param dec
- * @return char*
+ * @param dec    Base10 number
+ * @return char* Corresponding Base10 string
  */
-char * dec2dec(int dec) {
-    char * dst = int2str(dec);
-    prepend( & dst, "#");
-    return dst;
+char * Base10Number2String(int dec) {
+
+  int numDigits = 1;
+  int dec2 = dec;
+
+  /* Get the number of digits so we can allocate string with 
+   * proper size 
+   */
+  while(dec2 != 0){
+    dec2 /= 10;
+    numDigits++;
+  }
+
+  /* Add 2 more for '#' and '\0' */
+  char * str = malloc((numDigits + 2) * sizeof(char));
+
+  /* Store Base10 number as Base10 string*/
+  sprintf(str, "%d", dec);
+
+  /* Peprend '#' to make Base10 string valid */
+  prepend( & str, "#");
+  return str;
 }
 
 /** +
- * @fn int dec2dec2(char*)
+ * @fn int Base10String2Number(char*)
  * @brief Convert Base10 string into Base10 number
  *
- * @param dec
- * @return int
+ * @param str  Base10 string
+ * @return int corresponding Base10 number
  */
-int dec2dec2(char * dec) {
-    if (isValidBase10(dec))
-        return strtol((dec + 1), NULL, 10);
+int Base10String2Number(char * str) {
+
+  /* Check if Base10 string is a valid Base10 string*/
+    if (isValidBase10(str))
+      /* Pass dec + 1 since dec points to the desriptor '#' */
+      return strtol((str + 1), NULL, 10);
     else
-        return INT_MAX;
-}
-
-/** +
- * @fn char int2str*(int)
- * @brief
- *
- * @param dec
- * @return char*
- */
-char * int2str(int dec) {
-    char * str = malloc(sizeof(char * ));
-
-    sprintf(str, "%d", dec);
-
-    return str;
+      /* INT_MAX used to indicate invalid input Base10 string */
+      return INT_MAX;
 }
 
 /** +
@@ -2074,7 +2081,7 @@ bool isValidBase16(char * str) {
 	break;
 	  
       default :
-	/* The remaining indices must all be hex digits for a valid Base16 string */
+	/* The remaining indices must all be hex digits [0-9, A-F] for a valid Base16 string */
 	valid &= (isxdigit(str[j]) != 0);
 	break;
       }
@@ -2120,7 +2127,7 @@ bool isValidBase10(char * str) {
 	break;
 	
       default :
-	/* The remaining indices must all be digits for a valid Base10 string */
+	/* The remaining indices must all be digits [0-9] for a valid Base10 string */
 	valid &= (isdigit(str[j]) != 0);
 	break;
       }
@@ -2247,12 +2254,15 @@ enum pFSM checkImmidiate(char ** str) {
 
     /* If immediate is a hex string then convert to Base10 string */
     if (isValidBase16( * str)) {
-      int dec = hex2dec( * str);
-      free( * str);
-      * str = int2str(dec);
 
-      /* Prepend descriptor '#' for Base10 indication */
-      prepend(str, "#");
+      /* Get Base10 number of Base16 string*/
+      int dec = hex2dec( * str);
+
+      /* Free Base16 string */
+      free( * str);
+
+      /* Convert Base10 number to valid Base16 Number */
+      * str = Base10Number2String(dec);
       op = IMM;
     }
     else if (isValidBase10( * str))

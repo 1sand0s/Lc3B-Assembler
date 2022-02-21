@@ -164,11 +164,10 @@ int hex2dec(char * );
 char * dec2hex(int);
 char * dec2bin(int);
 char * bin2hex(char * );
-char * int2str(int);
 bool isValidBase16(char * );
 bool isValidBase10(char * );
-char * dec2dec(int);
-int dec2dec2(char * );
+char * Base10Number2String(int);
+int Base10String2Number(char * );
 bool checkValidRange(int, int);
 /***************************************************************************************/
 
