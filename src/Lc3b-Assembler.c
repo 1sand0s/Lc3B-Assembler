@@ -734,14 +734,17 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
  * @return errorCode
  */
 enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
-    if ((( * instruct).addr) % 2 != 0)
-        return INVALID_CONSTANT;
 
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return INVALID_CONSTANT;
+  /* Check if the starting address is word aligned */
+  if ((( * instruct).addr) % 2 != 0)
+    return INVALID_CONSTANT;
 
-    ( * instruct).encoding = Base10Number2Base2String(( * instruct).addr);
-    return OK_VALID;
+  /* Check if starting address range is valid */
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return INVALID_CONSTANT;
+  
+  ( * instruct).encoding = Base10Number2Base2String(( * instruct).addr);
+  return OK_VALID;
 }
 
 /** +
@@ -755,25 +758,19 @@ enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
  */
 enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
 
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
+  /* Check if address where this directive appears is valid*/
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
 
-    int constant = strtol((*instruct).operands[0] + 1, NULL, 10);
+  /* Get the operand of .FILL directive */
+  int constant = strtol((*instruct).operands[0] + 1, NULL, 10);
 
-    if(constant < -32768 || constant > 65535)
-        return INVALID_CONSTANT;
+  /* Check if the operand range is valid */
+  if(constant < -32768 || constant > 65535)
+    return INVALID_CONSTANT;
 
-    char * str = calloc(17, sizeof(char));
-
-    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
-
-    strcat(str, dr);
-    str[16] = '\0';
-    free(dr);
-
-    ( * instruct).encoding = str;
-    return OK_VALID;
-
+  ( * instruct).encoding = Base10Number2Base2String(constant);
+  return OK_VALID;
 }
 
 /** +
@@ -799,15 +796,18 @@ enum errorCode encodeEND(instruction * instruct, symbol * symbol, int count) {
  * @return errorCode
  */
 enum errorCode encodeNOP(instruction * instruct, symbol * symbol, int count) {
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
 
-    char * str = calloc(17, sizeof(char));
-    strcat(str, "0000000000000000");
-    str[16] = '\0';
-    ( * instruct).encoding = str;
+  /* Check if address where this directive appears is valid*/
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
 
-    return OK_VALID;
+  
+  char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
+  strcat(str, "0000000000000000");
+  str[16] = '\0';
+  ( * instruct).encoding = str;
+  
+  return OK_VALID;
 }
 
 /** +
@@ -1934,17 +1934,21 @@ int Base16String2Base10Number(char * str) {
 
 /** +
  * @fn char * Base10Number2Base16String(int)
- * @brief Convert a Base10 number into hex string
+ * @brief Convert a Base10 number into Base16 string
  *     
  *
- * @param dec    The Base10 number to convert to hex string
- * @return char* The hex string, caller must free the memory
+ * @param dec    The Base10 number to convert to Base16 string
+ * @return char* The Base16 string, caller must free the memory
  */
 char * Base10Number2Base16String(int dec) {
-  /* Allocate memory to store hex string */
-  char * hex = malloc(sizeof(char*));
+  /* Allocate memory to store Base16 string
+   *
+   *      int dec = 10;
+   *      Base16 string = X000A -> 5 bytes 
+   */
+  char * hex = calloc(ADDRESS_WIDTH_/4 + 1, sizeof(char));
 
-  /* Convert Base10 to hex string*/
+  /* Convert Base10 to Base16 string*/
   sprintf(hex, "%.4X", dec);
   return hex;
 }
