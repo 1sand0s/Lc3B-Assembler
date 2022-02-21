@@ -160,10 +160,10 @@ void insertInstruction(instruction ** , int * , char ** * , enum pFSM * , int, i
 
 
 /********************************Data Conversion Methods*********************************/
-int hex2dec(char * );
-char * dec2hex(int);
-char * dec2bin(int);
-char * bin2hex(char * );
+int Base16String2Base10Number(char * );
+char * Base10Number2Base16String(int);
+char * Base10Number2Base2String(int);
+char * Base2String2Base16String(char * );
 bool isValidBase16(char * );
 bool isValidBase10(char * );
 char * Base10Number2String(int);

@@ -92,6 +92,13 @@ v *
  */
 #define NUMBER_OF_DIRECTIVES_ 3
 
+/** +
+ * @def ADDRESS_WIDTH_
+ * @brief Size of each addressable location
+ *
+ */
+#define ADDRESS_WIDTH_ 16
+
 
 
 const char * inval[43] = {
@@ -375,7 +382,7 @@ enum errorCode assemble(FILE * in, FILE * out ) {
         printf("\n");
         for (int j = 0; j < tableCount; j++) {
             printWithIndent("*", INDENT_SYMBOL_);
-            char * addr = dec2hex(symbolTable[j].addr); //Convert base10 address to hex string
+            char * addr = Base10Number2Base16String(symbolTable[j].addr); //Convert base10 address to hex string
             printf("\t%-10s\t|\t%d(0x%s)\t\t*", symbolTable[j].symbolName, symbolTable[j].addr, addr);
             printf("\n");
             free(addr); // Free hex string
@@ -396,7 +403,7 @@ enum errorCode assemble(FILE * in, FILE * out ) {
         printf("\n");
         for (int j = 0; j < tableCount2; j++) {
             printWithIndent("*", INDENT_INSTRUCTION_);
-            char * hex = dec2hex(instructionTable[j].addr); //Convert base10 address to hex string
+            char * hex = Base10Number2Base16String(instructionTable[j].addr); //Convert base10 address to hex string
             printf("\t%d (0x%s)\t", instructionTable[j].addr, hex);
             printf("\t%-10s\t\t%-10s\t\t%-10s\t\t", instructionTable[j].label, instructionTable[j].directive, instructionTable[j].opcode);
             int i = 0;
@@ -438,7 +445,7 @@ enum errorCode assemble(FILE * in, FILE * out ) {
             if (errorp == OK_VALID) {
                 char * enc = NULL;
                 if (instructionTable[j].encoding != NULL) {
-                    enc = bin2hex((instructionTable[j].encoding));
+                    enc = Base2String2Base16String((instructionTable[j].encoding));
                     prepend( & enc, "0x");
                     fprintf(out, "%s\n", enc);
                 }
@@ -733,7 +740,7 @@ enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return INVALID_CONSTANT;
 
-    ( * instruct).encoding = dec2bin(( * instruct).addr);
+    ( * instruct).encoding = Base10Number2Base2String(( * instruct).addr);
     return OK_VALID;
 }
 
@@ -758,7 +765,7 @@ enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
 
     strcat(str, dr);
     str[16] = '\0';
@@ -822,7 +829,7 @@ enum errorCode encodeTRAP(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
 
     strcat(str, "11110000");
     strcat(str, dr + 8);
@@ -872,8 +879,8 @@ enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "0001");
     strcat(str, dr + 13);
@@ -888,11 +895,11 @@ enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
             free(str);
             return INVALID_CONSTANT;
         }
-        sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
         strcat(str, sr1 + 11);
     } else {
         strcat(str, "000");
-        sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
         strcat(str, sr1 + 13);
     }
     str[16] = '\0';
@@ -919,8 +926,8 @@ enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "1001");
     strcat(str, dr + 13);
@@ -934,11 +941,11 @@ enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
             free(str);
             return INVALID_CONSTANT;
         }
-        sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
         strcat(str, sr1 + 11);
     } else {
         strcat(str, "000");
-        sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
         strcat(str, sr1 + 13);
     }
     str[16] = '\0';
@@ -965,8 +972,8 @@ enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "0101");
     strcat(str, dr + 13);
@@ -981,11 +988,11 @@ enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
             free(str);
             return INVALID_CONSTANT;
         }
-        sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
         strcat(str, sr1 + 11);
     } else {
         strcat(str, "000");
-        sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
         strcat(str, sr1 + 13);
     }
     str[16] = '\0';
@@ -1013,7 +1020,7 @@ enum errorCode encodeJMP(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
 
     strcat(str, "1100000");
     strcat(str, dr + 13);
@@ -1074,7 +1081,7 @@ enum errorCode encodeJSR(instruction * instruct, symbol * sym, int count) {
             free(str);
             return OTHER_ERROR;
         }
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 5);
         str[16] = '\0';
         free(dr);
@@ -1112,7 +1119,7 @@ enum errorCode encodeBR(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "111");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1149,7 +1156,7 @@ enum errorCode encodeBRN(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "100");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1186,7 +1193,7 @@ enum errorCode encodeBRZ(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "010");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1223,7 +1230,7 @@ enum errorCode encodeBRP(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "001");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1260,7 +1267,7 @@ enum errorCode encodeBRNZ(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "110");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1297,7 +1304,7 @@ enum errorCode encodeBRNP(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "101");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1334,7 +1341,7 @@ enum errorCode encodeBRZP(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "011");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1371,7 +1378,7 @@ enum errorCode encodeBRNZP(instruction * instruct, symbol * sym, int count) {
 
         strcat(str, "111");
 
-        char * dr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(offset);
         strcat(str, dr + 7);
         str[16] = '\0';
         free(dr);
@@ -1397,7 +1404,7 @@ enum errorCode encodeJSRR(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
 
     strcat(str, "0100");
     strcat(str, "000");
@@ -1425,8 +1432,8 @@ enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "0010");
     strcat(str, dr + 13);
@@ -1438,7 +1445,7 @@ enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
         free(str);
         return INVALID_CONSTANT;
     }
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 10);
     str[16] = '\0';
     free(dr);
@@ -1465,8 +1472,8 @@ enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "0110");
     strcat(str, dr + 13);
@@ -1478,7 +1485,7 @@ enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
         free(str);
         return INVALID_CONSTANT;
     }
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 10);
 
     str[16] = '\0';
@@ -1515,8 +1522,8 @@ enum errorCode encodeLEA(instruction * instruct, symbol * sym, int count) {
         }
 
         strcat(str, "1110");
-        char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-        char * sr = dec2bin(offset);
+        char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+        char * sr = Base10Number2Base2String(offset);
         strcat(str, dr + 13);
         strcat(str, sr + 7);
         str[16] = '\0';
@@ -1545,8 +1552,8 @@ enum errorCode encodeNOT(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "1001");
     strcat(str, dr + 13);
@@ -1600,8 +1607,8 @@ enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "1101");
     strcat(str, dr + 13);
@@ -1616,7 +1623,7 @@ enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
         return INVALID_CONSTANT;
     }
 
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 12);
     str[16] = '\0';
     free(dr);
@@ -1643,8 +1650,8 @@ enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "1101");
     strcat(str, dr + 13);
@@ -1659,7 +1666,7 @@ enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
         return INVALID_CONSTANT;
     }
 
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 12);
     str[16] = '\0';
     free(dr);
@@ -1686,8 +1693,8 @@ enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "1101");
     strcat(str, dr + 13);
@@ -1702,7 +1709,7 @@ enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
         return INVALID_CONSTANT;
     }
 
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 12);
     str[16] = '\0';
     free(dr);
@@ -1729,8 +1736,8 @@ enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "0011");
     strcat(str, dr + 13);
@@ -1743,7 +1750,7 @@ enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
         return INVALID_CONSTANT;
     }
 
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 10);
     str[16] = '\0';
     free(sr);
@@ -1770,8 +1777,8 @@ enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
 
     char * str = calloc(17, sizeof(char));
 
-    char * dr = dec2bin(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = dec2bin(strtol(( * instruct).operands[1] + 1, NULL, 10));
+    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
 
     strcat(str, "0111");
     strcat(str, dr + 13);
@@ -1784,7 +1791,7 @@ enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
         return INVALID_CONSTANT;
     }
 
-    char * sr1 = dec2bin(strtol(( * instruct).operands[2] + 1, NULL, 10));
+    char * sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
     strcat(str, sr1 + 10);
     str[16] = '\0';
     free(sr);
@@ -1910,13 +1917,13 @@ void lexer(char * line, char ** * tokens, int * len) {
 }
 
 /** +
- * @fn int hex2dec(char*)
- * @brief Convert hex string into Base10 number
+ * @fn int Base16String2Base10Number(char*)
+ * @brief Convert Base16 string into Base10 number
  *
- * @param str
- * @return int
+ * @param str  Base16 string
+ * @return int The corresponding Base10 number 
  */
-int hex2dec(char * str) {
+int Base16String2Base10Number(char * str) {
   /* INT_MAX used as default placeholder to indicate invalid hex string */
   int dec = INT_MAX;
       
@@ -1926,16 +1933,16 @@ int hex2dec(char * str) {
 }
 
 /** +
- * @fn char dec2hex*(int)
+ * @fn char * Base10Number2Base16String(int)
  * @brief Convert a Base10 number into hex string
  *     
  *
  * @param dec    The Base10 number to convert to hex string
  * @return char* The hex string, caller must free the memory
  */
-char * dec2hex(int dec) {
+char * Base10Number2Base16String(int dec) {
   /* Allocate memory to store hex string */
-  char * hex = malloc(sizeof(char * ));
+  char * hex = malloc(sizeof(char*));
 
   /* Convert Base10 to hex string*/
   sprintf(hex, "%.4X", dec);
@@ -1944,54 +1951,67 @@ char * dec2hex(int dec) {
 
 /** +
  * @fn void prepend(char**, char*)
- * @brief
+ * @brief This function is used to prepend '#' or 'X' to Base10
+ *        or Base16 string to make them valid
  *
- * @param str
- * @param p
- * @return void
+ * @param str   The Base10 or Base16 string
+ * @param p     The descriptor to prepend <'#' or 'X'>
  */
 void prepend(char ** str, char * p) {
-    char * str2 = calloc(strlen( * str) + strlen(p) + 1, sizeof(char));
+  /* Allocate enough memory to store str and the string p to be prepended*/
+  char * str2 = calloc(strlen( * str) + strlen(p) + 1, sizeof(char));
 
-    strcat(str2, p);
-    strcat(str2, * str);
-    str2[strlen( * str) + strlen(p)] = '\0';
-    free( * str);
-    * str = str2;
+  /* Prepend string p to str2 */  
+  strcat(str2, p);
+
+  /* Concatenate string str to str2 */
+  strcat(str2, * str);
+  str2[strlen( * str) + strlen(p)] = '\0';
+
+  /* Free the old string */
+  free( * str);
+
+  /* Store newly formed string in the old string */
+  * str = str2;
 }
 
 /** +
- * @fn char bin2hex*(char*)
- * @brief Convert Base2 string into hex string
+ * @fn char *  Base2String2Base16String(char*)
+ * @brief Convert Base2 string into Base16 string
  *
- * @param dec
- * @return char*
+ * @param strBase2  Base2 string
+ * @return char*    Corresponding Base16 string
  */
-char * bin2hex(char * dec) {
+char * Base2String2Base16String(char * strBase2) {
+  /* Convert Base2 string to Base10 Number */
+  int dec = strtol(strBase2, NULL, 2);
 
-    int dec2 = strtol(dec, NULL, 2);
-
-    return dec2hex(dec2);
+  /* Convert Base10 number to Base16 string */  
+  return Base10Number2Base16String(dec);
 }
 
 /** +
- * @fn char dec2bin*(int)
+ * @fn char * Base10Number2BaseString(int)
  * @brief Convert Base10 number into Base2 string
  *
- * @param dec
- * @return char*
+ * @param dec    Base10 number
+ * @return char* Corresponding Base2 string
  */
-char * dec2bin(int dec) {
-    char * dst = calloc(17, sizeof(char));
+char * Base10Number2Base2String(int dec) {
+  /* Allocate memory to store the Base2 string */
+  char * dst = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
 
-    dec = dec >= 0 ? dec : (65536 + dec);
-    for (int i = 0; i <= 15; i++) {
-        dst[15 - i] = ((dec >> i) & 1) ? '1' : '0';
-    }
+  /* Integer overflow if dec > 16 bytes */
+  dec = dec >= 0 ? dec : (65536 + dec);
 
-    dst[16] = '\0';
+  /* Convert Base10 number to Base2 string */
+  for (int i = 0; i < ADDRESS_WIDTH_; i++) {
+    dst[ADDRESS_WIDTH_ - 1 - i] = ((dec >> i) & 1) ? '1' : '0';
+  }
 
-    return dst;
+  /* Add NULL terminating character */
+  dst[ADDRESS_WIDTH_] = '\0';
+  return dst;
 }
 
 /** +
@@ -2002,7 +2022,6 @@ char * dec2bin(int dec) {
  * @return char* Corresponding Base10 string
  */
 char * Base10Number2String(int dec) {
-
   int numDigits = 1;
   int dec2 = dec;
 
@@ -2256,7 +2275,7 @@ enum pFSM checkImmidiate(char ** str) {
     if (isValidBase16( * str)) {
 
       /* Get Base10 number of Base16 string*/
-      int dec = hex2dec( * str);
+      int dec = Base16String2Base10Number( * str);
 
       /* Free Base16 string */
       free( * str);
