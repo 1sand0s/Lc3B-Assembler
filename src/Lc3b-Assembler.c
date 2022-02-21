@@ -99,8 +99,7 @@ v *
  */
 #define ADDRESS_WIDTH_ 16
 
-
-
+/* List of all names that are invalid to use a labels in Lc3B assembly file */
 const char * inval[43] = {
 			  "IN",
 			  "OUT",
@@ -147,18 +146,21 @@ const char * inval[43] = {
 			  "R7"
 };
 
+/* Directives of Lc3B ISA as char* (used in converting char* tokens to pFSM lexemes) */
 const char * directives[NUMBER_OF_DIRECTIVES_]={
 						".ORIG",
 						".FILL",
 						".END"
 };
 
+/* Valid pFSM members for all directives of Lc3B ISA */
 const enum pFSM pDirectives[NUMBER_OF_DIRECTIVES_]={
 					       ORIG,
 					       FILL,
 					       END
 };
 
+/* Valid Registers that can be used with Lc3B instructions */
 const char * regs[NUMBER_OF_REGISTERS_]={
 					 "R0",
 					 "R1",
@@ -170,6 +172,7 @@ const char * regs[NUMBER_OF_REGISTERS_]={
 					 "R7"
 };
 
+/* Opcodes of Lc3B ISA as char* (used in converting char* tokens to pFSM lexemes) */
 const char * opcodes[NUMBER_OF_INSTRUCTIONS_]={
 					       "ADD",
 					       "AND",
@@ -201,6 +204,7 @@ const char * opcodes[NUMBER_OF_INSTRUCTIONS_]={
 					       "BRNZP"
 };
 
+/* Valid pFSM members for all opcodes of Lc3B ISA */
 const enum pFSM pOpcodes[NUMBER_OF_INSTRUCTIONS_] = {
 						     ADD,
 						     AND,
@@ -233,7 +237,7 @@ const enum pFSM pOpcodes[NUMBER_OF_INSTRUCTIONS_] = {
 };
 
 
-/* Valid State Transistions for tokens of an instruction */
+/* Valid state transistions for lexemes of an instruction */
 const enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] = {
 				    {ORIG, IMM, IGN, IGN, IGN}      ,       {LABEL, ORIG, IMM, IGN, IGN},
                                     {FILL, IMM, IGN, IGN, IGN}      ,       {LABEL, FILL, IMM, IGN, IGN},
@@ -280,38 +284,38 @@ const enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] =
  * @param int
  * @return errorCode     Any errors during encoding process
  */
-enum errorCode( * encoder[31])(instruction * , symbol * , int) = {
-    encodeORIG,
-    encodeFILL,
-    encodeEND,
-    encodeADD,
-    encodeAND,
-    encodeJMP,
-    encodeJSR,
-    encodeJSRR,
-    encodeLDB,
-    encodeLDW,
-    encodeLEA,
-    encodeNOP,
-    encodeNOT,
-    encodeRET,
-    encodeLSHF,
-    encodeRSHFL,
-    encodeRSHFA,
-    encodeRTI,
-    encodeSTB,
-    encodeSTW,
-    encodeTRAP,
-    encodeXOR,
-    encodeHALT,
-    encodeBR,
-    encodeBRN,
-    encodeBRZ,
-    encodeBRP,
-    encodeBRNZ,
-    encodeBRNP,
-    encodeBRZP,
-    encodeBRNZP
+enum errorCode( * encoder[NUMBER_OF_DIRECTIVES_ + NUMBER_OF_INSTRUCTIONS_])(instruction * , symbol * , int) = {
+   encodeORIG,
+   encodeFILL,
+   encodeEND,
+   encodeADD,
+   encodeAND,
+   encodeJMP,
+   encodeJSR,
+   encodeJSRR,
+   encodeLDB,
+   encodeLDW,
+   encodeLEA,
+   encodeNOP,
+   encodeNOT,
+   encodeRET,
+   encodeLSHF,
+   encodeRSHFL,
+   encodeRSHFA,
+   encodeRTI,
+   encodeSTB,
+   encodeSTW,
+   encodeTRAP,
+   encodeXOR,
+   encodeHALT,
+   encodeBR,
+   encodeBRN,
+   encodeBRZ,
+   encodeBRP,
+   encodeBRNZ,
+   encodeBRNP,
+   encodeBRZP,
+   encodeBRNZP
 };
 
 /** +
