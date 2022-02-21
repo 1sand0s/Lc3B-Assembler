@@ -324,32 +324,32 @@ enum errorCode( * encoder[31])(instruction * , symbol * , int) = {
  */
 int main(int argc, char ** argv) {
 
-    enum errorCode errorp; //Holds the type error encountered during assembly
-
-    /* Two arguements from command line expected
-     * 1. argv[1] : Name of the file containing assembly code <*.asm>
-     * 2. argv[2] : Name of the file to write assembled hex code to <*.hex> */
-    if (argc == 3) {
-        FILE * infile = fopen(argv[1], "r"); //Open *.asm for read-only
-        FILE * outfile = fopen(argv[2], "w"); //Open *.hex for write-mode
-
-        if (!infile) {
-            exit(OTHER_ERROR); //Unable to open *.asm file
-        }
-        else if (!outfile) {
-            exit(OTHER_ERROR); //Unable to open *.hex file
-        }
-        else {
-            /* Begin assembly if expected number of arguments is correct */
-            errorp = assemble(infile, outfile);
-            fclose(infile);
-            fclose(outfile);
-        }
+  enum errorCode errorp; //Holds the type error encountered during assembly
+  
+  /* Two arguements from command line expected
+   * 1. argv[1] : Name of the file containing assembly code <*.asm>
+   * 2. argv[2] : Name of the file to write assembled hex code to <*.hex> */
+  if (argc == 3) {
+    FILE * infile = fopen(argv[1], "r"); //Open *.asm for read-only
+    FILE * outfile = fopen(argv[2], "w"); //Open *.hex for write-mode
+    
+    if (!infile) {
+      exit(OTHER_ERROR); //Unable to open *.asm file
+    }
+    else if (!outfile) {
+      exit(OTHER_ERROR); //Unable to open *.hex file
     }
     else {
-        exit(OTHER_ERROR); //Missing commandline arguements
+      /* Begin assembly if expected number of arguments is correct */
+      errorp = assemble(infile, outfile);
+      fclose(infile);
+      fclose(outfile);
     }
-    exit(errorp);
+  }
+  else {
+    exit(OTHER_ERROR); //Missing commandline arguements
+  }
+  exit(errorp);
 }
 
 /** +
@@ -361,110 +361,110 @@ int main(int argc, char ** argv) {
  * @return errorCode    Any errors during the assembly process
  */
 enum errorCode assemble(FILE * in, FILE * out ) {
-    symbol * symbolTable = malloc(sizeof(struct symbol));
-    instruction * instructionTable = malloc(sizeof(struct instruction));
-    int tableCount = 0;
-    int tableCount2 = 0;
-    enum errorCode errorp;
-
-    /* Create symbol table */
-    errorp = createSymbolTable( in , START, & symbolTable, & tableCount, & instructionTable, & tableCount2);
-
-    /* If no errors then proceed with printing/writing to file */
-    if (errorp == OK_VALID) {
+  symbol * symbolTable = malloc(sizeof(struct symbol));
+  instruction * instructionTable = malloc(sizeof(struct instruction));
+  int tableCount = 0;
+  int tableCount2 = 0;
+  enum errorCode errorp;
+  
+  /* Create symbol table */
+  errorp = createSymbolTable( in , START, & symbolTable, & tableCount, & instructionTable, & tableCount2);
+  
+  /* If no errors then proceed with printing/writing to file */
+  if (errorp == OK_VALID) {
 #ifdef Debug_Print_SymbolTable //Comment out MACRO definition to stop printing symbol table
-
-        printf("\n\n\n");
-        char * header = "/*******************Symbol Table*************************/";
-        char * ender = "/********************************************************/";
-
-        printWithIndent(header, INDENT_SYMBOL_);
-        printf("\n");
-        for (int j = 0; j < tableCount; j++) {
-            printWithIndent("*", INDENT_SYMBOL_);
-            char * addr = Base10Number2Base16String(symbolTable[j].addr); //Convert base10 address to hex string
-            printf("\t%-10s\t|\t%d(0x%s)\t\t*", symbolTable[j].symbolName, symbolTable[j].addr, addr);
-            printf("\n");
-            free(addr); // Free hex string
-        }
-        printWithIndent(ender, INDENT_SYMBOL_);
-        printf("\n");
-#endif
-
-#ifdef Debug_Print_InstructionTable //Comment out MACRO definition to stop printing instruction table
-        printf("\n\n\n");
-        char * header1 = "/****************************************************Instruction Table*****************************************************************/";
-        char * ender1 = "/**************************************************************************************************************************************/";
-
-        printWithIndent(header1, INDENT_INSTRUCTION_);
-        printf("\n");
-        printWithIndent("*", INDENT_INSTRUCTION_);
-        printf("\t%-10s\t|\t%-10s\t|\t%-10s\t|\t%-10s\t|\t%-10s\t\t%10s", "ADDRESS", "LABEL", "Directive", "Opcode", "Operands", "*");
-        printf("\n");
-        for (int j = 0; j < tableCount2; j++) {
-            printWithIndent("*", INDENT_INSTRUCTION_);
-            char * hex = Base10Number2Base16String(instructionTable[j].addr); //Convert base10 address to hex string
-            printf("\t%d (0x%s)\t", instructionTable[j].addr, hex);
-            printf("\t%-10s\t\t%-10s\t\t%-10s\t\t", instructionTable[j].label, instructionTable[j].directive, instructionTable[j].opcode);
-            int i = 0;
-            for (; i < instructionTable[j].opCount; i++) {
-                printf("%-5s\t", instructionTable[j].operands[i]);
-                if (i < (instructionTable[j].opCount - 1))
-                    printf(",");
-            }
-            for (; i < 3; i++)
-                printf("\t");
-            printf("%10s\n", "*");
-            free(hex); // Free hex string
-        }
-        printWithIndent(ender1, INDENT_INSTRUCTION_);
-        printf("\n");
-#endif
-
-        /* Iterate through instruction table entries to encode them */
-        for (int j = 0; j < tableCount2; j++) {
-            for (int i = 4; i < 35; i++) {
-                /* Encode Directives */
-                if (instructionTable[j].directive != NULL) {
-                    if (strncmp(instructionTable[j].directive, inval[i], strlen(inval[i])) == 0 &&
-                        strlen(instructionTable[j].directive) == strlen(inval[i])) {
-                        errorp = encoder[i - 4]( & (instructionTable[j]), symbolTable, tableCount);
-                    }
-                }
-                /* Encode Instructions */
-                else if (instructionTable[j].opcode != NULL) {
-                    if (strncmp(instructionTable[j].opcode, inval[i], strlen(inval[i])) == 0 &&
-                        strlen(instructionTable[j].opcode) == strlen(inval[i])) {
-                        errorp = encoder[i - 4]( & (instructionTable[j]), symbolTable, tableCount);
-                    }
-                }
-            }
-#ifdef Debug_Print_InstructionTable
-            printf("%d\t", errorp);
-#endif
-            if (errorp == OK_VALID) {
-                char * enc = NULL;
-                if (instructionTable[j].encoding != NULL) {
-                    enc = Base2String2Base16String((instructionTable[j].encoding));
-                    prepend( & enc, "0x");
-                    fprintf(out, "%s\n", enc);
-                }
-#ifdef Debug_Print_InstructionTable
-                printf("%s", enc);
-                printf("\n");
-#endif
-                free(enc);
-            }
-            else
-                break;
-        }
+    
+    printf("\n\n\n");
+    char * header = "/*******************Symbol Table*************************/";
+    char * ender = "/********************************************************/";
+    
+    printWithIndent(header, INDENT_SYMBOL_);
+    printf("\n");
+    for (int j = 0; j < tableCount; j++) {
+      printWithIndent("*", INDENT_SYMBOL_);
+      char * addr = Base10Number2Base16String(symbolTable[j].addr); //Convert base10 address to hex string
+      printf("\t%-10s\t|\t%d(0x%s)\t\t*", symbolTable[j].symbolName, symbolTable[j].addr, addr);
+      printf("\n");
+      free(addr); // Free hex string
     }
-    freeSymbolTable( & symbolTable, & tableCount); //Free the symbol table
-    freeInstructionTable( & instructionTable, & tableCount2); //Free the instruction table
-
-    /* return the errorcode
-     * Should be OK_VALID if no errors */
-    return errorp;
+    printWithIndent(ender, INDENT_SYMBOL_);
+    printf("\n");
+#endif
+    
+#ifdef Debug_Print_InstructionTable //Comment out MACRO definition to stop printing instruction table
+    printf("\n\n\n");
+    char * header1 = "/****************************************************Instruction Table*****************************************************************/";
+    char * ender1 = "/**************************************************************************************************************************************/";
+    
+    printWithIndent(header1, INDENT_INSTRUCTION_);
+    printf("\n");
+    printWithIndent("*", INDENT_INSTRUCTION_);
+    printf("\t%-10s\t|\t%-10s\t|\t%-10s\t|\t%-10s\t|\t%-10s\t\t%10s", "ADDRESS", "LABEL", "Directive", "Opcode", "Operands", "*");
+    printf("\n");
+    for (int j = 0; j < tableCount2; j++) {
+      printWithIndent("*", INDENT_INSTRUCTION_);
+      char * hex = Base10Number2Base16String(instructionTable[j].addr); //Convert base10 address to hex string
+      printf("\t%d (0x%s)\t", instructionTable[j].addr, hex);
+      printf("\t%-10s\t\t%-10s\t\t%-10s\t\t", instructionTable[j].label, instructionTable[j].directive, instructionTable[j].opcode);
+      int i = 0;
+      for (; i < instructionTable[j].opCount; i++) {
+	printf("%-5s\t", instructionTable[j].operands[i]);
+	if (i < (instructionTable[j].opCount - 1))
+	  printf(",");
+      }
+      for (; i < 3; i++)
+	printf("\t");
+      printf("%10s\n", "*");
+      free(hex); // Free hex string
+    }
+    printWithIndent(ender1, INDENT_INSTRUCTION_);
+    printf("\n");
+#endif
+    
+    /* Iterate through instruction table entries to encode them */
+    for (int j = 0; j < tableCount2; j++) {
+      for (int i = 4; i < 35; i++) {
+	/* Encode Directives */
+	if (instructionTable[j].directive != NULL) {
+	  if (strncmp(instructionTable[j].directive, inval[i], strlen(inval[i])) == 0 &&
+	      strlen(instructionTable[j].directive) == strlen(inval[i])) {
+	    errorp = encoder[i - 4]( & (instructionTable[j]), symbolTable, tableCount);
+	  }
+	}
+	/* Encode Instructions */
+	else if (instructionTable[j].opcode != NULL) {
+	  if (strncmp(instructionTable[j].opcode, inval[i], strlen(inval[i])) == 0 &&
+	      strlen(instructionTable[j].opcode) == strlen(inval[i])) {
+	    errorp = encoder[i - 4]( & (instructionTable[j]), symbolTable, tableCount);
+	  }
+	}
+      }
+#ifdef Debug_Print_InstructionTable
+      printf("%d\t", errorp);
+#endif
+      if (errorp == OK_VALID) {
+	char * enc = NULL;
+	if (instructionTable[j].encoding != NULL) {
+	  enc = Base2String2Base16String((instructionTable[j].encoding));
+	  prepend( & enc, "0x");
+	  fprintf(out, "%s\n", enc);
+	}
+#ifdef Debug_Print_InstructionTable
+	printf("%s", enc);
+	printf("\n");
+#endif
+	free(enc);
+      }
+      else
+	break;
+    }
+  }
+  freeSymbolTable( & symbolTable, & tableCount); //Free the symbol table
+  freeInstructionTable( & instructionTable, & tableCount2); //Free the instruction table
+  
+  /* return the errorcode
+   * Should be OK_VALID if no errors */
+  return errorp;
 }
 
 /** +
@@ -474,8 +474,9 @@ enum errorCode assemble(FILE * in, FILE * out ) {
  * @param text   char* to print
  * @param indent Amount of indentation
  */
-void printWithIndent(char * text, int indent) {
-    printf("%*s%s", indent, "", text);
+void printWithIndent(char * text,
+		     int indent) {
+  printf("%*s%s", indent, "", text);
 }
 
 /** +
@@ -485,11 +486,11 @@ void printWithIndent(char * text, int indent) {
  * @param str char* to convert to uppercase
  */
 void toUpperCase(char * str) {
-    for (int i = 0; i < strlen(str); i++) {
-        /* Check if alphabet before converting to uppercase */
-        if (isalpha(str[i]) != 0)
-            str[i] = toupper(str[i]);
-    }
+  for (int i = 0; i < strlen(str); i++) {
+    /* Check if alphabet before converting to uppercase */
+    if (isalpha(str[i]) != 0)
+      str[i] = toupper(str[i]);
+  }
 }
 
 /** +
@@ -504,96 +505,101 @@ void toUpperCase(char * str) {
  * @param tableCount2       Number of elements/instructions in instruction table
  * @return
  */
-enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTable, int * tableCount, instruction ** instructionTable, int * tableCount2) {
-    char * line = NULL;
-    size_t len = 0;
-    bool flag = true;
-    enum errorCode errorp;
-    int index = 0;
-    char * startAddr=NULL;
-
-    while (flag) {
-        switch (state) {
-        case START:
-            if (getline( & line, & len, in ) == -1)
-                state = STOP;
-            else {
-	      char ** tokens;
-	      int len1 = 0;
-	      lexer(line, & tokens, & len1);
-	      if (len1 != 0) {
-		enum pFSM * stateT;
-		errorp = integrityCheck( & tokens, & len1, & stateT);
-		if (errorp == OK_VALID) {
-		  if (stateT[0] == ORIG) {
-		    state = PSTART;
-		    startAddr = Base10Number2String(Base10String2Number(tokens[1]));
-		    insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, 0, startAddr);
-		  }
-		  else {
-		    state = STOP;
-		  }
-		}
-		else {
-		  state = STOP;
-		}
-		free(stateT);
-		freeLexemes( & tokens, & len1);
-	      }
-            }
-            break;
-
-        case PSTART:
-            if (getline( & line, & len, in ) == -1)
+enum errorCode createSymbolTable(FILE * in ,
+				 enum FSM state,
+				 symbol ** symbolTable,
+				 int * tableCount,
+				 instruction ** instructionTable,
+				 int * tableCount2) {
+  char * line = NULL;
+  size_t len = 0;
+  bool flag = true;
+  enum errorCode errorp;
+  int index = 0;
+  char * startAddr=NULL;
+  
+  while (flag) {
+    switch (state) {
+    case START:
+      if (getline( & line, & len, in ) == -1)
+	state = STOP;
+      else {
+	char ** tokens;
+	int len1 = 0;
+	lexer(line, & tokens, & len1);
+	if (len1 != 0) {
+	  enum pFSM * stateT;
+	  errorp = integrityCheck( & tokens, & len1, & stateT);
+	  if (errorp == OK_VALID) {
+	    if (stateT[0] == ORIG) {
+	      state = PSTART;
+	      startAddr = Base10Number2String(Base10String2Number(tokens[1]));
+	      insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, 0, startAddr);
+	    }
+	    else {
 	      state = STOP;
-            else {
-	      char ** tokens;
-	      int len1 = 0;
-	      lexer(line, & tokens, & len1);
-	      if (len1 != 0) {
-		index++;
-		enum pFSM * stateT;
-		errorp = integrityCheck( & tokens, & len1, & stateT);
-		if (errorp == OK_VALID) {
-		  if (stateT[0] == ORIG) {
-		    state = STOP;
-		  }
-		  else if (stateT[0] == LABEL) {
-		    insertSymbol(symbolTable, tableCount, tokens[0], index, startAddr);
-		  }
-		  else if (stateT[0] == END || stateT[1] == END) {
-		    state = PEND;
-		  }
-		  insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, index - 1, startAddr);
-		}
-		else {
-		  state = STOP;
-		}
-		free(stateT);
-		freeLexemes( & tokens, & len1);
-	      }
-            }
-            break;
-
-        case PEND:
-            free(startAddr);
-            flag = false;
-            break;
-
-        case STOP:
-        if(startAddr)
-	  free(startAddr);
-	errorp = errorp == OK_VALID ? OTHER_ERROR : errorp;
-	flag = false;
-	break;
-        }
+	    }
+	  }
+	  else {
+	    state = STOP;
+	  }
+	  free(stateT);
+	  freeLexemes( & tokens, & len1);
+	}
+      }
+      break;
+      
+    case PSTART:
+      if (getline( & line, & len, in ) == -1)
+	state = STOP;
+      else {
+	char ** tokens;
+	int len1 = 0;
+	lexer(line, & tokens, & len1);
+	if (len1 != 0) {
+	  index++;
+	  enum pFSM * stateT;
+	  errorp = integrityCheck( & tokens, & len1, & stateT);
+	  if (errorp == OK_VALID) {
+	    if (stateT[0] == ORIG) {
+	      state = STOP;
+	    }
+	    else if (stateT[0] == LABEL) {
+	      insertSymbol(symbolTable, tableCount, tokens[0], index, startAddr);
+	    }
+	    else if (stateT[0] == END || stateT[1] == END) {
+	      state = PEND;
+	    }
+	    insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, index - 1, startAddr);
+	  }
+	  else {
+	    state = STOP;
+	  }
+	  free(stateT);
+	  freeLexemes( & tokens, & len1);
+	}
+      }
+      break;
+      
+    case PEND:
+      free(startAddr);
+      flag = false;
+      break;
+      
+    case STOP:
+      if(startAddr)
+	free(startAddr);
+      errorp = errorp == OK_VALID ? OTHER_ERROR : errorp;
+      flag = false;
+      break;
     }
-
-    if (line) {
-      free(line);
-    }
-    rewind( in );
-    return errorp;
+  }
+  
+  if (line) {
+    free(line);
+  }
+  rewind( in );
+  return errorp;
 }
 
 /** +
@@ -607,45 +613,49 @@ enum errorCode createSymbolTable(FILE * in , enum FSM state, symbol ** symbolTab
  * @param startAddr     Starting Address of the assemby code (defined using ORIG)
  * @return void
  */
-void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int line, char * startAddr) {
-    if ( * tableCount > 0) {
-        int j = 0;
-
-        /* Check if symbol exists in symbol table
-         * LABELS(Symbols) can be defined somewhere and referenced elesewhere
-         * We don't want to add duplicate entries*/
-        for (; j < * tableCount; j++) {
-            if (strncmp(( * symbolTable)[j].symbolName, label, strlen(label)) == 0) {
-                break;
-            }
-        }
-
-        /* If symbol/label not found in symbol table then add to symbol table*/
-        if (j == * tableCount) {
-
-            /* Increase memory allocation to symbol table to insert new symbol */
-            * symbolTable = realloc( * symbolTable, (j + 1) * sizeof(struct symbol));
-            ( * symbolTable)[j].symbolName = malloc(strlen(label) + 1);
-
-            /* Copy label into symbol table */
-            strncpy(( * symbolTable)[j].symbolName, label, (size_t)(strlen(label) + 1));
-
-            /* Copy address(base10) into symbol table */
-            ( * symbolTable)[j].addr = Base10String2Number(startAddr) + (line - 1) * 2;
-            * tableCount = ( * tableCount) + 1;
-        }
+void insertSymbol(symbol ** symbolTable,
+		  int * tableCount,
+		  char * label,
+		  int line,
+		  char * startAddr) {
+  if ( * tableCount > 0) {
+    int j = 0;
+    
+    /* Check if symbol exists in symbol table
+     * LABELS(Symbols) can be defined somewhere and referenced elesewhere
+     * We don't want to add duplicate entries*/
+    for (; j < * tableCount; j++) {
+      if (strncmp(( * symbolTable)[j].symbolName, label, strlen(label)) == 0) {
+	break;
+      }
     }
-    else {
-        /* Allocate memory to hold the label name*/
-        ( * symbolTable)[0].symbolName = malloc(strlen(label) + 1);
-
-        /* Copy label into symbol table */
-        strncpy(( * symbolTable)[0].symbolName, label, (size_t)(strlen(label) + 1));
-
-        /* Copy address(base10) into symbol table */
-        ( * symbolTable)[0].addr = Base10String2Number(startAddr) + (line - 1) * 2;
-        * tableCount = ( * tableCount) + 1;
+    
+    /* If symbol/label not found in symbol table then add to symbol table*/
+    if (j == * tableCount) {
+      
+      /* Increase memory allocation to symbol table to insert new symbol */
+      * symbolTable = realloc( * symbolTable, (j + 1) * sizeof(struct symbol));
+      ( * symbolTable)[j].symbolName = malloc(strlen(label) + 1);
+      
+      /* Copy label into symbol table */
+      strncpy(( * symbolTable)[j].symbolName, label, (size_t)(strlen(label) + 1));
+      
+      /* Copy address(base10) into symbol table */
+      ( * symbolTable)[j].addr = Base10String2Number(startAddr) + (line - 1) * 2;
+      * tableCount = ( * tableCount) + 1;
     }
+  }
+  else {
+    /* Allocate memory to hold the label name*/
+    ( * symbolTable)[0].symbolName = malloc(strlen(label) + 1);
+    
+    /* Copy label into symbol table */
+    strncpy(( * symbolTable)[0].symbolName, label, (size_t)(strlen(label) + 1));
+    
+    /* Copy address(base10) into symbol table */
+    ( * symbolTable)[0].addr = Base10String2Number(startAddr) + (line - 1) * 2;
+    * tableCount = ( * tableCount) + 1;
+  }
 }
 
 /**+
@@ -661,67 +671,73 @@ void insertSymbol(symbol ** symbolTable, int * tableCount, char * label, int lin
  * @param startAddr         Starting address of the code (defined using ORIG)
  * @return void
  */
-void insertInstruction(instruction ** instructionTable, int * tableCount, char ** * tokens, enum pFSM * stateTransition, int step, int line, char * startAddr) {
+void insertInstruction(instruction ** instructionTable,
+		       int * tableCount,
+		       char ** * tokens,
+		       enum pFSM * stateTransition,
+		       int step,
+		       int line,
+		       char * startAddr) {
 
-    /* Increase memory allocation to insert new instruction
-     * No checking necessary since every instruction has to be processed */
-    ( * instructionTable) = realloc( * instructionTable, ( * tableCount + 1) * sizeof(struct instruction));
-    ( * instructionTable)[ * tableCount].label = NULL;
-    ( * instructionTable)[ * tableCount].directive = NULL;
-    ( * instructionTable)[ * tableCount].opcode = NULL;
-    ( * instructionTable)[ * tableCount].operands = NULL;
-    ( * instructionTable)[ * tableCount].encoding = NULL;
-    ( * instructionTable)[ * tableCount].opCount = 0;
-
-    /* Find beginning indices of lexemes in tokens */
-    int labelIndex = firstInstanceofLabel(stateTransition, step);
-    int directiveIndex = firstInstanceofDirective(stateTransition, step);
-    int opcodeIndex = firstInstanceofOpcode(stateTransition, step);
-    int operandIndex = firstInstanceofOperands(stateTransition, step);
-
-    /* Copy label lexeme if it exists into instruction table
-     * 1. Label here refers to definition and not reference
-     * 2. Label references are stored as operands
-     *
-     *      inst1-> START ADD R1, R1, #-1
-     *      inst2-> BR START
-     *
-     * Label START in inst1 is a definition and hence will be stored as label in instruction table
-     * Label START in inst2 is an operand/reference and hence will be stored as operands in instruction table
-     */
-    if (labelIndex == 0) {
-        ( * instructionTable)[ * tableCount].label = malloc(strlen(( * tokens)[0]) + 1);
-        strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (size_t)(strlen(( * tokens)[0]) + 1));
+  /* Increase memory allocation to insert new instruction
+   * No checking necessary since every instruction has to be processed */
+  ( * instructionTable) = realloc( * instructionTable, ( * tableCount + 1) * sizeof(struct instruction));
+  ( * instructionTable)[ * tableCount].label = NULL;
+  ( * instructionTable)[ * tableCount].directive = NULL;
+  ( * instructionTable)[ * tableCount].opcode = NULL;
+  ( * instructionTable)[ * tableCount].operands = NULL;
+  ( * instructionTable)[ * tableCount].encoding = NULL;
+  ( * instructionTable)[ * tableCount].opCount = 0;
+  
+  /* Find beginning indices of lexemes in tokens */
+  int labelIndex = firstInstanceofLabel(stateTransition, step);
+  int directiveIndex = firstInstanceofDirective(stateTransition, step);
+  int opcodeIndex = firstInstanceofOpcode(stateTransition, step);
+  int operandIndex = firstInstanceofOperands(stateTransition, step);
+  
+  /* Copy label lexeme if it exists into instruction table
+   * 1. Label here refers to definition and not reference
+   * 2. Label references are stored as operands
+   *
+   *      inst1-> START ADD R1, R1, #-1
+   *      inst2-> BR START
+   *
+   * Label START in inst1 is a definition and hence will be stored as label in instruction table
+   * Label START in inst2 is an operand/reference and hence will be stored as operands in instruction table
+   */
+  if (labelIndex == 0) {
+    ( * instructionTable)[ * tableCount].label = malloc(strlen(( * tokens)[0]) + 1);
+    strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (size_t)(strlen(( * tokens)[0]) + 1));
+  }
+  
+  /* Copy directive lexeme if it exists into instruction table */
+  if (directiveIndex < step) {
+    ( * instructionTable)[ * tableCount].directive = malloc(strlen(( * tokens)[directiveIndex]) + 1);
+    strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (size_t)(strlen(( * tokens)[directiveIndex]) + 1));
+  }
+  
+  /* Copy opcode lexeme if it exists into instruction table */
+  if (opcodeIndex < step) {
+    ( * instructionTable)[ * tableCount].opcode = malloc(strlen(( * tokens)[opcodeIndex]) + 1);
+    strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (size_t)(strlen(( * tokens)[opcodeIndex]) + 1));
+  }
+  
+  /* Copy operand lexemes if it exists into instruction table */
+  if (operandIndex < step) {
+    ( * instructionTable)[ * tableCount].operands = malloc((step - operandIndex) * sizeof(char ** ));
+    
+    for (int j = operandIndex; j < step; j++) {
+      ( * instructionTable)[ * tableCount].operands[j - operandIndex] = malloc(strlen(( * tokens)[j]) + 1);
+      strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (size_t)(strlen(( * tokens)[j]) + 1));
     }
+    ( * instructionTable)[ * tableCount].opCount = step - operandIndex;
+  }
 
-    /* Copy directive lexeme if it exists into instruction table */
-    if (directiveIndex < step) {
-        ( * instructionTable)[ * tableCount].directive = malloc(strlen(( * tokens)[directiveIndex]) + 1);
-        strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (size_t)(strlen(( * tokens)[directiveIndex]) + 1));
-    }
-
-    /* Copy opcode lexeme if it exists into instruction table */
-    if (opcodeIndex < step) {
-        ( * instructionTable)[ * tableCount].opcode = malloc(strlen(( * tokens)[opcodeIndex]) + 1);
-        strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (size_t)(strlen(( * tokens)[opcodeIndex]) + 1));
-    }
-
-    /* Copy operand lexemes if it exists into instruction table */
-    if (operandIndex < step) {
-        ( * instructionTable)[ * tableCount].operands = malloc((step - operandIndex) * sizeof(char ** ));
-
-        for (int j = operandIndex; j < step; j++) {
-            ( * instructionTable)[ * tableCount].operands[j - operandIndex] = malloc(strlen(( * tokens)[j]) + 1);
-            strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (size_t)(strlen(( * tokens)[j]) + 1));
-        }
-        ( * instructionTable)[ * tableCount].opCount = step - operandIndex;
-    }
-
-    /* Copy instruction address into instruction table */
-    if (startAddr != NULL) {
-        ( * instructionTable)[ * tableCount].addr = Base10String2Number(startAddr) + line * 2;
-    }
-    * tableCount = * tableCount + 1;
+  /* Copy instruction address into instruction table */
+  if (startAddr != NULL) {
+    ( * instructionTable)[ * tableCount].addr = Base10String2Number(startAddr) + line * 2;
+  }
+  * tableCount = * tableCount + 1;
 }
 
 /** +
@@ -733,7 +749,9 @@ void insertInstruction(instruction ** instructionTable, int * tableCount, char *
  * @param count
  * @return errorCode
  */
-enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeORIG(instruction * instruct,
+			  symbol * symbol,
+			  int count) {
 
   /* Check if the starting address is word aligned */
   if ((( * instruct).addr) % 2 != 0)
@@ -756,7 +774,9 @@ enum errorCode encodeORIG(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeFILL(instruction * instruct,
+			  symbol * symbol,
+			  int count) {
 
   /* Check if address where this directive appears is valid*/
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -782,7 +802,9 @@ enum errorCode encodeFILL(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeEND(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeEND(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
     return OK_VALID;
 }
 
@@ -795,18 +817,27 @@ enum errorCode encodeEND(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeNOP(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeNOP(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
 
   /* Check if address where this directive appears is valid*/
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
     return OTHER_ERROR;
 
-  
+  /* Every addressable location can contain 16 bits (ADDRESS_WIDTH_) 
+   * and we add 1 for NULL terminating character
+   */
   char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
+
+  /* Encoding of the NOP instruction */
   strcat(str, "0000000000000000");
+
+  /* Add the NULL terminating character */
   str[16] = '\0';
+
+  /* Store encoded string into instruct */
   ( * instruct).encoding = str;
-  
   return OK_VALID;
 }
 
@@ -819,26 +850,31 @@ enum errorCode encodeNOP(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeTRAP(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeTRAP(instruction * instruct,
+			  symbol * symbol,
+			  int count) {
+  
+  /* Get the operand of TRAP instruction */
+  int operand = strtol(( * instruct).operands[0] + 1, NULL, 10);
 
-    int op = strtol(( * instruct).operands[0] + 1, NULL, 10);
-
-    if(op<0 || op > 255)
+  /* CHeck if operand is in valid range */
+  if(operand <0 || operand > 255)
     return INVALID_CONSTANT;
+  
+  /* Every addressable location can contain 16 bits (ADDRESS_WIDTH_) 
+   * and we add 1 for NULL terminating character
+   */
+  char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
 
+  char * dr = Base10Number2Base2String(operand);
 
-    char * str = calloc(17, sizeof(char));
+  strcat(str, "11110000");
+  strcat(str, dr + 8);
+  str[16] = '\0';
+  free(dr);
+  ( * instruct).encoding = str;
 
-    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
-
-    strcat(str, "11110000");
-    strcat(str, dr + 8);
-    str[16] = '\0';
-    free(dr);
-    ( * instruct).encoding = str;
-
-    return OK_VALID;
-
+  return OK_VALID;
 }
 
 /** +
@@ -850,18 +886,25 @@ enum errorCode encodeTRAP(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeHALT(instruction * instruct, symbol * symbol, int count) {
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
+enum errorCode encodeHALT(instruction * instruct,
+			  symbol * symbol,
+			  int count) {
 
-    char * str = calloc(17, sizeof(char));
+  /* Check if address where this instruction appears is valid */
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
 
-    strcat(str, "1111000000100101");
-    str[16] = '\0';
+  /* Every addressable location can contain 16 bits (ADDRESS_WIDTH_) 
+   * and we add 1 for NULL terminating character
+   */
+  char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
 
-    ( * instruct).encoding = str;
+  strcat(str, "1111000000100101");
+  str[16] = '\0';
+  
+  ( * instruct).encoding = str;
 
-    return OK_VALID;
+  return OK_VALID;
 }
 
 /** +
@@ -873,42 +916,57 @@ enum errorCode encodeHALT(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
+enum errorCode encodeADD(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
 
-    char * str = calloc(17, sizeof(char));
+  /* Check if address where this instruction appears is valid */
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
 
-    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
+  /* Every addressable location can contain 16 bits (ADDRESS_WIDTH_) 
+   * and we add 1 for NULL terminating character
+   */
+  char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
 
-    strcat(str, "0001");
-    strcat(str, dr + 13);
-    strcat(str, sr + 13);
-    char * sr1 = NULL;
+  /* Get the operands of the instruction */
+  int operand1 = strtol(( * instruct).operands[0] + 1, NULL, 10);
+  int operand2 = strtol(( * instruct).operands[1] + 1, NULL, 10);
+  int operand3 = strtol(( * instruct).operands[2] + 1, NULL, 10);
 
-    if (checkImmidiate( & ( * instruct).operands[2]) == IMM) {
-        strcat(str, "1");
-        if (!checkValidRange(strtol(( * instruct).operands[2] + 1, NULL, 10), 5)) {
-            free(dr);
-            free(sr);
-            free(str);
-            return INVALID_CONSTANT;
-        }
-        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
-        strcat(str, sr1 + 11);
-    } else {
-        strcat(str, "000");
-        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
-        strcat(str, sr1 + 13);
-    }
-    str[16] = '\0';
-    free(dr);
-    free(sr);
-    free(sr1);
-    ( * instruct).encoding = str;
+  /* The first 2 operands are Registers for ADD */
+  char * dr = Base10Number2Base2String(operand1);
+  char * sr = Base10Number2Base2String(operand2);
 
-    return OK_VALID;
+  strcat(str, "0001");
+
+  /* The last 3 bits of dr and sr give the register thats passed as operand to ADD */
+  strcat(str, dr + 13);
+  strcat(str, sr + 13);
+  char * sr1 = NULL;
+  
+  if (checkImmidiate( & ( * instruct).operands[2]) == IMM) {
+    strcat(str, "1");
+    if (!checkValidRange(operand3, 5)) {
+	free(dr);
+	free(sr);
+	free(str);
+	return INVALID_CONSTANT;
+      }
+    sr1 = Base10Number2Base2String(operand3);
+    strcat(str, sr1 + 11);
+  }
+  else {
+    strcat(str, "000");
+    sr1 = Base10Number2Base2String(operand3);
+    strcat(str, sr1 + 13);
+  }
+  str[16] = '\0';
+  free(dr);
+  free(sr);
+  free(sr1);
+  ( * instruct).encoding = str;
+  return OK_VALID;
 }
 
 /** +
@@ -920,41 +978,54 @@ enum errorCode encodeADD(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
+enum errorCode encodeXOR(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
 
-    char * str = calloc(17, sizeof(char));
+  /* Check if address where this instruction appears is valid */
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
+  
+  /* Every addressable location can contain 16 bits (ADDRESS_WIDTH_) 
+   * and we add 1 for NULL terminating character
+   */
+  char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
 
-    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
+  /* Get the operands of the instruction */
+  int operand1 = strtol(( * instruct).operands[0] + 1, NULL, 10);
+  int operand2 = strtol(( * instruct).operands[1] + 1, NULL, 10);
+  int operand3 = strtol(( * instruct).operands[2] + 1, NULL, 10);
 
-    strcat(str, "1001");
-    strcat(str, dr + 13);
-    strcat(str, sr + 13);
-    char * sr1 = NULL;
-    if (checkImmidiate( & ( * instruct).operands[2]) == IMM) {
-        strcat(str, "1");
-        if (!checkValidRange(strtol(( * instruct).operands[2] + 1, NULL, 10), 5)) {
-            free(dr);
-            free(sr);
-            free(str);
-            return INVALID_CONSTANT;
-        }
-        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
-        strcat(str, sr1 + 11);
-    } else {
-        strcat(str, "000");
-        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
-        strcat(str, sr1 + 13);
+  /* The first 2 operands are Registers for ADD */
+  char * dr = Base10Number2Base2String(operand1);
+  char * sr = Base10Number2Base2String(operand2);
+
+  strcat(str, "1001");
+  strcat(str, dr + 13);
+  strcat(str, sr + 13);
+  char * sr1 = NULL;
+  if (checkImmidiate( & ( * instruct).operands[2]) == IMM) {
+    strcat(str, "1");
+    if (!checkValidRange(operand3, 5)) {
+      free(dr);
+      free(sr);
+      free(str);
+      return INVALID_CONSTANT;
     }
-    str[16] = '\0';
-    free(dr);
-    free(sr);
-    free(sr1);
-    ( * instruct).encoding = str;
-
-    return OK_VALID;
+    sr1 = Base10Number2Base2String(operand3);
+    strcat(str, sr1 + 11);
+  }
+  else {
+    strcat(str, "000");
+    sr1 = Base10Number2Base2String(operand3);
+    strcat(str, sr1 + 13);
+  }
+  str[16] = '\0';
+  free(dr);
+  free(sr);
+  free(sr1);
+  ( * instruct).encoding = str; 
+  return OK_VALID;
 }
 
 /** +
@@ -966,43 +1037,55 @@ enum errorCode encodeXOR(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
+enum errorCode encodeAND(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
 
-    char * str = calloc(17, sizeof(char));
+  /* Check if address where this instruction appears is valid */
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
+  
+  /* Every addressable location can contain 16 bits (ADDRESS_WIDTH_) 
+   * and we add 1 for NULL terminating character
+   */
+  char * str = calloc(ADDRESS_WIDTH_ + 1, sizeof(char));
 
-    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
-    char * sr = Base10Number2Base2String(strtol(( * instruct).operands[1] + 1, NULL, 10));
+  /* Get the operands of the instruction */
+  int operand1 = strtol(( * instruct).operands[0] + 1, NULL, 10);
+  int operand2 = strtol(( * instruct).operands[1] + 1, NULL, 10);
+  int operand3 = strtol(( * instruct).operands[2] + 1, NULL, 10);
 
-    strcat(str, "0101");
-    strcat(str, dr + 13);
-    strcat(str, sr + 13);
+  /* The first 2 operands are Registers for ADD */
+  char * dr = Base10Number2Base2String(operand1);
+  char * sr = Base10Number2Base2String(operand2);
 
-    char * sr1 = NULL;
-    if (checkImmidiate( & ( * instruct).operands[2]) == IMM) {
-        strcat(str, "1");
-        if (!checkValidRange(strtol(( * instruct).operands[2] + 1, NULL, 10), 5)) {
-            free(dr);
-            free(sr);
-            free(str);
-            return INVALID_CONSTANT;
-        }
-        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
-        strcat(str, sr1 + 11);
-    } else {
-        strcat(str, "000");
-        sr1 = Base10Number2Base2String(strtol(( * instruct).operands[2] + 1, NULL, 10));
-        strcat(str, sr1 + 13);
+  strcat(str, "0101");
+  strcat(str, dr + 13);
+  strcat(str, sr + 13);
+  
+  char * sr1 = NULL;
+  if (checkImmidiate( & ( * instruct).operands[2]) == IMM) {
+    strcat(str, "1");
+    if (!checkValidRange(operand3, 5)) {
+      free(dr);
+      free(sr);
+      free(str);
+      return INVALID_CONSTANT;
     }
-    str[16] = '\0';
-    free(dr);
-    free(sr);
-    free(sr1);
-    ( * instruct).encoding = str;
-
-    return OK_VALID;
-
+    sr1 = Base10Number2Base2String(operand3);
+    strcat(str, sr1 + 11);
+  }
+  else {
+    strcat(str, "000");
+    sr1 = Base10Number2Base2String(operand3);
+    strcat(str, sr1 + 13);
+  }
+  str[16] = '\0';
+  free(dr);
+  free(sr);
+  free(sr1);
+  ( * instruct).encoding = str;
+  return OK_VALID;
 }
 
 /** +
@@ -1014,23 +1097,24 @@ enum errorCode encodeAND(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeJMP(instruction * instruct, symbol * symbol, int count) {
-    if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
-        return OTHER_ERROR;
-
-    char * str = calloc(17, sizeof(char));
-
-    char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
-
-    strcat(str, "1100000");
-    strcat(str, dr + 13);
-    strcat(str, "000000");
-    str[16] = '\0';
-    free(dr);
-    ( * instruct).encoding = str;
-
-    return OK_VALID;
-
+enum errorCode encodeJMP(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
+  if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
+    return OTHER_ERROR;
+  
+  char * str = calloc(17, sizeof(char));
+  
+  char * dr = Base10Number2Base2String(strtol(( * instruct).operands[0] + 1, NULL, 10));
+  
+  strcat(str, "1100000");
+  strcat(str, dr + 13);
+  strcat(str, "000000");
+  str[16] = '\0';
+  free(dr);
+  ( * instruct).encoding = str;
+  return OK_VALID;
 }
 
 /** +
@@ -1042,7 +1126,10 @@ enum errorCode encodeJMP(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeRET(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeRET(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1066,7 +1153,10 @@ enum errorCode encodeRET(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeJSR(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeJSR(instruction * instruct,
+			 symbol * sym,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1102,7 +1192,10 @@ enum errorCode encodeJSR(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBR(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBR(instruction * instruct,
+			symbol * sym,
+			int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1139,7 +1232,10 @@ enum errorCode encodeBR(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRN(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRN(instruction * instruct,
+			 symbol * sym,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1176,7 +1272,10 @@ enum errorCode encodeBRN(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRZ(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRZ(instruction * instruct,
+			 symbol * sym,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1213,7 +1312,10 @@ enum errorCode encodeBRZ(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRP(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRP(instruction * instruct,
+			 symbol * sym,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1250,7 +1352,10 @@ enum errorCode encodeBRP(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRNZ(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRNZ(instruction * instruct,
+			  symbol * sym,
+			  int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1287,7 +1392,10 @@ enum errorCode encodeBRNZ(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRNP(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRNP(instruction * instruct,
+			  symbol * sym,
+			  int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1324,7 +1432,10 @@ enum errorCode encodeBRNP(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRZP(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRZP(instruction * instruct,
+			  symbol * sym,
+			  int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1361,7 +1472,10 @@ enum errorCode encodeBRZP(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeBRNZP(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeBRNZP(instruction * instruct,
+			   symbol * sym,
+			   int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1398,7 +1512,10 @@ enum errorCode encodeBRNZP(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeJSRR(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeJSRR(instruction * instruct,
+			  symbol * symbol,
+			  int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1426,7 +1543,10 @@ enum errorCode encodeJSRR(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeLDB(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1466,7 +1586,10 @@ enum errorCode encodeLDB(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeLDW(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1506,7 +1629,10 @@ enum errorCode encodeLDW(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeLEA(instruction * instruct, symbol * sym, int count) {
+enum errorCode encodeLEA(instruction * instruct,
+			 symbol * sym,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1546,7 +1672,10 @@ enum errorCode encodeLEA(instruction * instruct, symbol * sym, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeNOT(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeNOT(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1577,7 +1706,10 @@ enum errorCode encodeNOT(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeRTI(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeRTI(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1601,7 +1733,10 @@ enum errorCode encodeRTI(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeLSHF(instruction * instruct,
+			  symbol * symbol,
+			  int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1644,7 +1779,10 @@ enum errorCode encodeLSHF(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeRSHFL(instruction * instruct,
+			   symbol * symbol,
+			   int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1687,7 +1825,10 @@ enum errorCode encodeRSHFL(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeRSHFA(instruction * instruct,
+			   symbol * symbol,
+			   int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1730,7 +1871,10 @@ enum errorCode encodeRSHFA(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeSTB(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1771,7 +1915,10 @@ enum errorCode encodeSTB(instruction * instruct, symbol * symbol, int count) {
  * @param count
  * @return errorCode
  */
-enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
+enum errorCode encodeSTW(instruction * instruct,
+			 symbol * symbol,
+			 int count) {
+  
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
 
@@ -1812,7 +1959,8 @@ enum errorCode encodeSTW(instruction * instruct, symbol * symbol, int count) {
  * @param len
  * @return void
  */
-void freeLexemes(char ** * lexemes, int * len) {
+void freeLexemes(char ** * lexemes,
+		 int * len) {
     for (int i = 0; i < * len; i++) {
         free(( * lexemes)[i]);
     }
@@ -1827,7 +1975,8 @@ void freeLexemes(char ** * lexemes, int * len) {
  * @param tableCount
  * @return void
  */
-void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
+void freeSymbolTable(symbol ** symbolTable,
+		     int * tableCount) {
     for (int j = 0; j < * tableCount; j++) {
         free(( * symbolTable)[j].symbolName);
     }
@@ -1842,7 +1991,8 @@ void freeSymbolTable(symbol ** symbolTable, int * tableCount) {
  * @param tableCount
  * @return void
  */
-void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
+void freeInstructionTable(instruction ** instructionTable,
+			  int * tableCount) {
     for (int j = 0; j < * tableCount; j++) {
         free(( * instructionTable)[j].label);
         free(( * instructionTable)[j].directive);
@@ -1865,54 +2015,56 @@ void freeInstructionTable(instruction ** instructionTable, int * tableCount) {
  * @param len
  * @return void
  */
-void lexer(char * line, char ** * tokens, int * len) {
+void lexer(char * line,
+	   char ** * tokens,
+	   int * len) {
 
 #ifdef Debug_Print
-    printf("\n%s\n", line);
+  printf("\n%s\n", line);
 #endif
 
-    /* Get index of beginning of comments if any */
-    size_t index = strcspn(line, ";");
-
-    /* Ignore lines which are completely comments*/
-    if (index != 0)
+  /* Get index of beginning of comments if any */
+  size_t index = strcspn(line, ";");
+  
+  /* Ignore lines which are completely comments*/
+  if (index != 0)
     {
-        char * subbuff = malloc(index + 1);
-
-	/* Copy line from <*.asm> file into temporary buffer */
-        strncpy(subbuff, &line[0], index);
-	subbuff[index] = '\0';
+      char * subbuff = malloc(index + 1);
+      
+      /* Copy line from <*.asm> file into temporary buffer */
+      strncpy(subbuff, &line[0], index);
+      subbuff[index] = '\0';
 
 #ifdef Debug_Print
-        printf("%s\n", subbuff);
+      printf("%s\n", subbuff);
 #endif
+      
+      /* Tokenize line with \n and \t as seperators */
+      char * token = strtok(subbuff, " ,\n\t");
+      
+      /* Initialize len to 0 */
+      int c = 0;
+      
+      while (token != NULL) {
+	* tokens = c == 0 ? malloc(sizeof(char * )) : realloc( * tokens, (c + 1) * sizeof(char * ));
+	( * tokens)[c] = malloc((strlen(token) + 1) * sizeof(char));
+	
+	/* Copy current token from line into tokens variable */
+	strncpy(( * tokens)[c], token, (size_t)(strlen(token) + 1));
+	
+	/* Convert all tokens to uppercase for uniformity */
+	toUpperCase(( * tokens)[c]);
 
-	/* Tokenize line with \n and \t as seperators */
-        char * token = strtok(subbuff, " ,\n\t");
-
-	/* Initialize len to 0 */
-	int c = 0;
-
-        while (token != NULL) {
-	  * tokens = c == 0 ? malloc(sizeof(char * )) : realloc( * tokens, (c + 1) * sizeof(char * ));
-	  ( * tokens)[c] = malloc((strlen(token) + 1) * sizeof(char));
-
-	  /* Copy current token from line into tokens variable */
-	  strncpy(( * tokens)[c], token, (size_t)(strlen(token) + 1));
-
-	  /* Convert all tokens to uppercase for uniformity */
-	  toUpperCase(( * tokens)[c]);
-
-	  /* Get next token */
-	  token = strtok(NULL, " ,\n\t");
-	  c++;
-        }
-
-	/* Keep reference to number of extracted tokens */
-	*len = c;
-
-        /* Free buffer used to store line from <*.asm> file */
-        free(subbuff);
+	/* Get next token */
+	token = strtok(NULL, " ,\n\t");
+	c++;
+      }
+      
+      /* Keep reference to number of extracted tokens */
+      *len = c;
+      
+      /* Free buffer used to store line from <*.asm> file */
+      free(subbuff);
     }
 }
 
@@ -1961,7 +2113,8 @@ char * Base10Number2Base16String(int dec) {
  * @param str   The Base10 or Base16 string
  * @param p     The descriptor to prepend <'#' or 'X'>
  */
-void prepend(char ** str, char * p) {
+void prepend(char ** str,
+	     char * p) {
   /* Allocate enough memory to store str and the string p to be prepended*/
   char * str2 = calloc(strlen( * str) + strlen(p) + 1, sizeof(char));
 
@@ -2309,7 +2462,9 @@ enum pFSM checkImmidiate(char ** str) {
  * @param count            Number of tokens
  * @param stateTransition  Corresponding lexeme array (must be freed by the caller)
  */
-void convertTokens(char ** * tokens, int * count, enum pFSM ** stateTransition) {
+void convertTokens(char ** * tokens,
+		   int * count,
+		   enum pFSM ** stateTransition) {
   int step = 0;
   enum pFSM state = START;
 
@@ -2360,7 +2515,9 @@ void convertTokens(char ** * tokens, int * count, enum pFSM ** stateTransition) 
  * @param stateTransition  Corresponding lexeme array (must be freed by the caller)
  * @return errorCode       Error if the instruction is invalid
  */
-enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateTransition) {
+enum errorCode integrityCheck(char ** * tokens,
+			      int * count,
+			      enum pFSM ** stateTransition) {
 
   /* Convert tokens(stored as char*) into lexemes(stored as enum pFSM) */
   convertTokens(tokens, count, stateTransition);
@@ -2436,7 +2593,9 @@ enum errorCode integrityCheck(char ** * tokens, int * count, enum pFSM ** stateT
  * @return int    Index of first mismatch (if equal to count then the two arrays are identical 
  *                w.r.t to lexemes)
  */
-int matchLexemes(const enum pFSM * lArray1, const enum pFSM * lArray2, int count){
+int matchLexemes(const enum pFSM * lArray1,
+		 const enum pFSM * lArray2,
+		 int count){
   /* Index of mismatch , should be count if no mismatch and lexeme arrays are equal */
   int index = -1;
 
@@ -2461,7 +2620,8 @@ int matchLexemes(const enum pFSM * lArray1, const enum pFSM * lArray2, int count
  * @param len    Length of lexeme array
  * @return int   Index of label in lexeme array (if equal to len then not found in given lexeme array)
  */
-int firstInstanceofLabel(enum pFSM * states, int len) {
+int firstInstanceofLabel(enum pFSM * states,
+			 int len) {
   int j = 0;
   for (; j < len; j++) {
     
@@ -2486,7 +2646,8 @@ int firstInstanceofLabel(enum pFSM * states, int len) {
  * @param len    Length of lexeme array
  * @return int   Index of directives in lexeme array (if equal to len then not found in given lexeme array)
  */
-int firstInstanceofDirective(enum pFSM * states, int len) {
+int firstInstanceofDirective(enum pFSM * states,
+			     int len) {
   int j = 0;
   for (; j < len; j++) {
 
@@ -2511,7 +2672,8 @@ int firstInstanceofDirective(enum pFSM * states, int len) {
  * @param len    Length of lexeme array
  * @return int   Index of opcode in lexeme array (if equal to len then not found in given lexeme array)
  */
-int firstInstanceofOpcode(enum pFSM * states, int len) {
+int firstInstanceofOpcode(enum pFSM * states,
+			  int len) {
     int j = 0;
     for (; j < len; j++) {
         int i = 0;
@@ -2543,7 +2705,8 @@ int firstInstanceofOpcode(enum pFSM * states, int len) {
  * @param len    Length of lexeme array
  * @return int   Index of operands in lexeme array (if equal to len then not found in given lexeme array)
  */
-int firstInstanceofOperands(enum pFSM * states, int len) {
+int firstInstanceofOperands(enum pFSM * states,
+			    int len) {
   int j = 0;
   for (; j < len; j++) {
 
@@ -2565,7 +2728,9 @@ int firstInstanceofOperands(enum pFSM * states, int len) {
  * @param label Label whose address is to be found
  * @return int  The address of the label (-1 if not found)
  */
-int getAddrofLabel(symbol * sym, int count, char * label) {
+int getAddrofLabel(symbol * sym,
+		   int count,
+		   char * label) {
   /* Use -1 as default placeholder to indicate missing label in symbol table */
   int addr = -1;
 
@@ -2589,7 +2754,8 @@ int getAddrofLabel(symbol * sym, int count, char * label) {
  * @param numBits Specified number of bits
  * @return bool    
  */
-bool checkValidRange(int dec, int numBits) {
+bool checkValidRange(int dec,
+		     int numBits) {
   /* A signed 5-bit Base10 number can only exist in the closed interval [-2^4, 2^4 - 1] */
   return ((dec <= (pow(2, numBits - 1) - 1)) && (dec >= -pow(2, numBits - 1)));
 }
