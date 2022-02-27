@@ -3,6 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/1sand0s/Lc3B-Assembler)
 
 <h2> What is it ?</h2>
+
 A standalone assembler for the [Lc3B ISA](https://courses.engr.illinois.edu/ece411/fa2019/mp/LC3b_ISA.pdf) written from scratch in C without any 
 external libraries besides std Clibs. 
 
