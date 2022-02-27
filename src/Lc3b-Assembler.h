@@ -174,7 +174,7 @@ bool checkValidRange(int, int);
 
 
 /******************************Cleanup Methods******************************************/
-void freeLexemes(char ** * , int * );
+void freeTokens(char ** * , int * );
 void freeSymbolTable(symbol ** , int * );
 void freeInstructionTable(instruction ** , int * );
 /***************************************************************************************/
