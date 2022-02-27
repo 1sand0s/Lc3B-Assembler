@@ -15,18 +15,14 @@ the assembly language to machine code.
 
 <h2>Setup</h2>
 
-1. <h4>Install Git:</h4>
-
-    Download [Git](http://git-scm.com/downloads) and install it.
-
-2. <h4>Clone the Lc3B-Assembler repository:</h4>
+1. <h4>Clone the Lc3B-Assembler repository:</h4>
 
     If you installed Git, execute the following command:<br> `git clone https://github.com/1sand0s/Lc3B-Assembler.git`<br><br>
     Otherwise, download the repository as a [zip ball](https://github.com/1sand0s/Lc3B-Assembler/archive/refs/heads/main.zip)
 
-6. <h4>Building and Running Tests:</h4>
+2. <h4>Building and Running Tests:</h4>
 
-    Open a command prompt/terminal, `cd` to the directory `Lc3B-Assembler`, and execute
+    `cd` to the project root directory `Lc3B-Assembler`, and execute
     ```
     ./configure LIBS=-lm
     make 
@@ -37,6 +33,6 @@ the assembly language to machine code.
     The `configure` script might complain about [check](https://libcheck.github.io/check/) package not being present. `check` is the test runner used for 
     unit-testing. You can install `check` as follows `sudo apt-get install check` or build it from source by following these [instructions](https://github.com/libcheck/check)
 
-7. <h4>Running:</h4>
+3. <h4>Running:</h4>
 
     To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute:<br> `./Lc3BAssembler <*.asm> <*.hex>`
