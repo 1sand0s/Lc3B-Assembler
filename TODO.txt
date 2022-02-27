@@ -1,4 +1,21 @@
+ - Remove comments from self-explanatory code blocks
+
+ - Simplify ode by relegating only the control flow for handling errors into branches keeping main flow outside
+
+ - Unrelated error checks should have separate branches (check goto style error handling)
+
+ - Place more descriptive comments in function block rather than in code
+
+ - Reduce commenting by making code self-explanatory/self-documenting
+   -Isolate blocks of code into self describing named functions
+   -Isolation of code into functions makes unit testing easier and more effective
+   -Reduces coupling between unrelated code
+   -Makes it reusable across functions
+ 
  - Xmacro for keeping function pointers in sync with enum pFSM states
+
  - Modular print/log function with levels
+
  - Const correctness for improved readability
+
  - Appropriate usage of signed and unsigned integers
