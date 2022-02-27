@@ -500,6 +500,7 @@ void toUpperCase(char * str) {
 /** +
  * @fn enum errorCode createSymbolTable(FILE*, enum FSM, symbol**, int*, instruction**, int*)
  * @brief Creates a table of all symbols encountered during the first pass of the assembly code
+ *        and also an instruction table for all the instructions
  *
  * @param in                FILE* the assembly code file <*.asm>
  * @param state             State of the assembly process
@@ -507,7 +508,7 @@ void toUpperCase(char * str) {
  * @param tableCount        Number of elements/symbols in symbol table
  * @param instructionTable  Struct to hold instructions in the assembly code
  * @param tableCount2       Number of elements/instructions in instruction table
- * @return
+ * @return                  Error code if any errors are encountered
  */
 enum errorCode createSymbolTable(FILE * in ,
 				 enum FSM state,
@@ -519,72 +520,82 @@ enum errorCode createSymbolTable(FILE * in ,
   size_t len = 0;
   bool flag = true;
   enum errorCode errorp;
-  int index = 0;
   char * startAddr=NULL;
-  
+
+  /* Keep iterating through the file line by line unless any line (instruction) has an error */
   while (flag) {
     switch (state) {
     case START:
+
+      /* Read line from assembly file (in) into line */
       if (getline( & line, & len, in ) == -1)
+	/* If EOF then stop assembly */
 	state = STOP;
       else {
+
+	/* Pointer to hold tokens extracted from a line in the <*.asm> file*/
 	char ** tokens;
-	int len1 = 0;
-	lexer(line, & tokens, & len1);
-	if (len1 != 0) {
-	  enum pFSM * stateT;
-	  errorp = integrityCheck( & tokens, & len1, & stateT);
-	  if (errorp == OK_VALID) {
-	    if (stateT[0] == ORIG) {
-	      state = PSTART;
+	int tokenCount = 0;
+
+	/* Extract the tokens from line */
+	lexer(line, & tokens, & tokenCount);
+
+	/* If line empty or completely commented out then continue */
+	if (tokenCount == 0)
+	  continue;
+
+	/* Pointer to hold lexemes to be converted from tokens */
+	enum pFSM * lexemes;
+
+	/* Convert tokens to lexemes and check if instruction is valid */
+	errorp = integrityCheck( & tokens, & tokenCount, & lexemes);
+
+	/* If instruction is valid */
+	if (errorp == OK_VALID) {
+
+	  /* The first line of any Lc3B <*.asm> file must be a .ORIG directive */
+	  if (*tableCount2 == 0){
+
+	    /* If first instruction not .ORIG then stop assembly */
+	    if(lexemes[0] != ORIG)
+	      state = STOP;
+	    else{
+
+	      /* The .ORIG directive defines the starting address in virtual memory where the rest of 
+	       * the following instructions will be stored
+	       */
 	      startAddr = Base10Number2String(Base10String2Number(tokens[1]));
-	      insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, 0, startAddr);
-	    }
-	    else {
-	      state = STOP;
 	    }
 	  }
-	  else {
-	    state = STOP;
-	  }
-	  free(stateT);
-	  freeLexemes( & tokens, & len1);
-	}
-      }
-      break;
-      
-    case PSTART:
-      if (getline( & line, & len, in ) == -1)
-	state = STOP;
-      else {
-	char ** tokens;
-	int len1 = 0;
-	lexer(line, & tokens, & len1);
-	if (len1 != 0) {
-	  index++;
-	  enum pFSM * stateT;
-	  errorp = integrityCheck( & tokens, & len1, & stateT);
-	  if (errorp == OK_VALID) {
-	    if (stateT[0] == ORIG) {
+	  else{
+	    
+	    /* If another .ORIG is encountered then the <*.asm> file is invalid so stop assembly */
+	    if (lexemes[0] == ORIG)
 	      state = STOP;
-	    }
-	    else if (stateT[0] == LABEL) {
-	      insertSymbol(symbolTable, tableCount, tokens[0], index, startAddr);
-	    }
-	    else if (stateT[0] == END || stateT[1] == END) {
+
+	    /* If a LABEL is the first lexeme then add it to the symbol table */
+	    else if (lexemes[0] == LABEL)
+	      insertSymbol(symbolTable, tableCount, tokens[0], *tableCount2, startAddr);
+
+	    /* End assembly if a .END directive is encountered */
+	    else if (lexemes[0] == END || lexemes[1] == END) 
 	      state = PEND;
-	    }
-	    insertInstruction(instructionTable, tableCount2, & tokens, stateT, len1, index - 1, startAddr);
 	  }
-	  else {
-	    state = STOP;
-	  }
-	  free(stateT);
-	  freeLexemes( & tokens, & len1);
+
+	  /* Insert the instruction into the instructionTable to encode later on during second pass */
+	  insertInstruction(instructionTable, tableCount2, & tokens, lexemes, tokenCount, *tableCount2 - 1, startAddr);
 	}
+ 
+	/* If instruction has any error then assembly file is invalid so stop assembly */
+	else
+	  state = STOP;
+
+	/* Free the lexemes and the tokens */
+	free(lexemes);
+	freeTokens( & tokens, & tokenCount);
       }
       break;
-      
+          
     case PEND:
       free(startAddr);
       flag = false;
@@ -598,11 +609,14 @@ enum errorCode createSymbolTable(FILE * in ,
       break;
     }
   }
-  
-  if (line) {
+
+  /* Free memory allocated to store lines from input <*.asm> file */
+  if (line)
     free(line);
-  }
+ 
   rewind( in );
+
+  /* Return the errocode */
   return errorp;
 }
 
@@ -739,6 +753,8 @@ void insertInstruction(instruction ** instructionTable,
 
   /* Copy instruction address into instruction table */
   if (startAddr != NULL) {
+    if(line < 0)
+      line = 0;
     ( * instructionTable)[ * tableCount].addr = Base10String2Number(startAddr) + line * 2;
   }
   * tableCount = * tableCount + 1;
@@ -1956,19 +1972,19 @@ enum errorCode encodeSTW(instruction * instruct,
 }
 
 /** +
- * @fn void freeLexemes(char***, int*)
- * @brief Free memory allocated to store lexemes
+ * @fn void freeTokens(char***, int*)
+ * @brief Free memory allocated to store tokens
  *
- * @param lexemes
+ * @param tokens
  * @param len
  * @return void
  */
-void freeLexemes(char ** * lexemes,
-		 int * len) {
+void freeTokens(char ** * tokens,
+		int * len) {
     for (int i = 0; i < * len; i++) {
-        free(( * lexemes)[i]);
+        free(( * tokens)[i]);
     }
-    free( * lexemes);
+    free( * tokens);
 }
 
 /** +
