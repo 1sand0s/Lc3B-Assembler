@@ -1,0 +1,4 @@
+ - Xmacro for keeping function pointers in sync with enum pFSM states
+ - Modular print/log function with levels
+ - Const correctness for improved readability
+ - Appropriate usage of signed and unsigned integers
