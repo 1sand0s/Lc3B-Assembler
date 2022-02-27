@@ -656,7 +656,7 @@ void insertSymbol(symbol ** symbolTable,
       ( * symbolTable)[j].symbolName = malloc(strlen(label) + 1);
       
       /* Copy label into symbol table */
-      strncpy(( * symbolTable)[j].symbolName, label, (size_t)(strlen(label) + 1));
+      strncpy(( * symbolTable)[j].symbolName, label, (strlen(label) + 1));
       
       /* Copy address(base10) into symbol table */
       ( * symbolTable)[j].addr = Base10String2Number(startAddr) + (line - 1) * 2;
@@ -668,7 +668,7 @@ void insertSymbol(symbol ** symbolTable,
     ( * symbolTable)[0].symbolName = malloc(strlen(label) + 1);
     
     /* Copy label into symbol table */
-    strncpy(( * symbolTable)[0].symbolName, label, (size_t)(strlen(label) + 1));
+    strncpy(( * symbolTable)[0].symbolName, label, (strlen(label) + 1));
     
     /* Copy address(base10) into symbol table */
     ( * symbolTable)[0].addr = Base10String2Number(startAddr) + (line - 1) * 2;
@@ -725,28 +725,28 @@ void insertInstruction(instruction ** instructionTable,
    */
   if (labelIndex == 0) {
     ( * instructionTable)[ * tableCount].label = malloc(strlen(( * tokens)[0]) + 1);
-    strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (size_t)(strlen(( * tokens)[0]) + 1));
+    strncpy(( * instructionTable)[ * tableCount].label, ( * tokens)[0], (strlen(( * tokens)[0]) + 1));
   }
   
   /* Copy directive lexeme if it exists into instruction table */
   if (directiveIndex < step) {
     ( * instructionTable)[ * tableCount].directive = malloc(strlen(( * tokens)[directiveIndex]) + 1);
-    strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (size_t)(strlen(( * tokens)[directiveIndex]) + 1));
+    strncpy(( * instructionTable)[ * tableCount].directive, ( * tokens)[directiveIndex], (strlen(( * tokens)[directiveIndex]) + 1));
   }
   
   /* Copy opcode lexeme if it exists into instruction table */
   if (opcodeIndex < step) {
     ( * instructionTable)[ * tableCount].opcode = malloc(strlen(( * tokens)[opcodeIndex]) + 1);
-    strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (size_t)(strlen(( * tokens)[opcodeIndex]) + 1));
+    strncpy(( * instructionTable)[ * tableCount].opcode, ( * tokens)[opcodeIndex], (strlen(( * tokens)[opcodeIndex]) + 1));
   }
   
   /* Copy operand lexemes if it exists into instruction table */
   if (operandIndex < step) {
-    ( * instructionTable)[ * tableCount].operands = malloc((step - operandIndex) * sizeof(char ** ));
+    ( * instructionTable)[ * tableCount].operands = malloc((step - operandIndex) * sizeof(char * ));
     
     for (int j = operandIndex; j < step; j++) {
       ( * instructionTable)[ * tableCount].operands[j - operandIndex] = malloc(strlen(( * tokens)[j]) + 1);
-      strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (size_t)(strlen(( * tokens)[j]) + 1));
+      strncpy(( * instructionTable)[ * tableCount].operands[j - operandIndex], ( * tokens)[j], (strlen(( * tokens)[j]) + 1));
     }
     ( * instructionTable)[ * tableCount].opCount = step - operandIndex;
   }
