@@ -16,6 +16,6 @@
 
  + Modular print/log function with levels
 
- + Const correctness for improved readability
+ - [DONE] Const correctness for improved readability
 
  + Appropriate usage of signed and unsigned integers

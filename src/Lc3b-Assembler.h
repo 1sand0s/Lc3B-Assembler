@@ -141,13 +141,13 @@ instruction;
 
 
 /***************************************Lexeme Integrity Checker*********************************/
-enum pFSM checkLabel(char * );
-enum pFSM checkpOP(char * );
-enum pFSM checkInst(char * );
-enum pFSM checkRegister(char * );
+enum pFSM checkLabel(const char * );
+enum pFSM checkpOP(const char * );
+enum pFSM checkInst(const char * );
+enum pFSM checkRegister(const char * );
 enum pFSM checkImmidiate(char ** );
 enum errorCode integrityCheck(char ** * , int * , enum pFSM ** );
-int matchLexemes(const enum pFSM *, const enum pFSM *, int);
+int matchLexemes(const enum pFSM *, const enum pFSM *, const int);
 /************************************************************************************************/
 
 
@@ -179,7 +179,7 @@ bool isValidBase16(char * );
 bool isValidBase10(char * );
 char * Base10Number2String(int);
 int Base10String2Number(char * );
-bool checkValidRange(int, int);
+bool checkValidRange(const int, const int);
 /***************************************************************************************/
 
 
@@ -193,20 +193,20 @@ void freeInstructionTable(instruction ** , int * );
 
 
 /******************************Miscellaneous Methods************************************/
-void printWithIndent(char * , int);
+void printWithIndent(const char * , const int);
 void prepend(char ** , char * );
-int getAddrofLabel(symbol * , int, char * );
+int getAddrofLabel(const symbol * , const int, const char * );
 void toUpperCase(char * );
 /***************************************************************************************/
 
 
 
 /***************************************Encoder Methods*********************************/
-#define D_ENTRY(a, b) enum errorCode b(instruction * , symbol * , int);
+#define D_ENTRY(a, b) enum errorCode b(instruction * , const symbol * , const int);
     DIRECTIVE_TABLE_
 #undef D_ENTRY
 
-#define I_ENTRY(a, b) enum errorCode b(instruction * , symbol * , int);
+#define I_ENTRY(a, b) enum errorCode b(instruction * , const symbol * , const int);
     INSTRUCTION_TABLE_
 #undef I_ENTRY
 /***************************************************************************************/

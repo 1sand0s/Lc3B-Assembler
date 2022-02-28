@@ -386,8 +386,8 @@ enum errorCode assemble(FILE * in, FILE * out ) {
  * @param text   char* to print
  * @param indent Amount of indentation
  */
-void printWithIndent(char * text,
-		     int indent) {
+void printWithIndent(const char * text,
+		     const int indent) {
   printf("%*s%s", indent, "", text);
 }
 
@@ -678,8 +678,8 @@ void insertInstruction(instruction ** instructionTable,
  * @return errorCode
  */
 enum errorCode encodeORIG(instruction * instruct,
-			  symbol * symbol,
-			  int count) {
+			  const symbol * symbol,
+			  const int count) {
 
   /* Check if the starting address is word aligned */
   if ((( * instruct).addr) % 2 != 0)
@@ -703,8 +703,8 @@ enum errorCode encodeORIG(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeFILL(instruction * instruct,
-			  symbol * symbol,
-			  int count) {
+			  const symbol * symbol,
+			  const int count) {
 
   /* Check if address where this directive appears is valid*/
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -731,8 +731,8 @@ enum errorCode encodeFILL(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeEND(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
     return OK_VALID;
 }
 
@@ -746,8 +746,8 @@ enum errorCode encodeEND(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeNOP(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
 
   /* Check if address where this directive appears is valid*/
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -779,8 +779,8 @@ enum errorCode encodeNOP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeTRAP(instruction * instruct,
-			  symbol * symbol,
-			  int count) {
+			  const symbol * symbol,
+			  const int count) {
   
   /* Get the operand of TRAP instruction */
   int operand = strtol(( * instruct).operands[0] + 1, NULL, 10);
@@ -815,8 +815,8 @@ enum errorCode encodeTRAP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeHALT(instruction * instruct,
-			  symbol * symbol,
-			  int count) {
+			  const symbol * symbol,
+			  const int count) {
 
   /* Check if address where this instruction appears is valid */
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -845,8 +845,8 @@ enum errorCode encodeHALT(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeADD(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
 
   /* Check if address where this instruction appears is valid */
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -907,8 +907,8 @@ enum errorCode encodeADD(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeXOR(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
 
   /* Check if address where this instruction appears is valid */
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -966,8 +966,8 @@ enum errorCode encodeXOR(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeAND(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
 
   /* Check if address where this instruction appears is valid */
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
@@ -1026,8 +1026,8 @@ enum errorCode encodeAND(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeJMP(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
   if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
     return OTHER_ERROR;
@@ -1055,8 +1055,8 @@ enum errorCode encodeJMP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeRET(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1082,8 +1082,8 @@ enum errorCode encodeRET(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeJSR(instruction * instruct,
-			 symbol * sym,
-			 int count) {
+			 const symbol * sym,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1121,8 +1121,8 @@ enum errorCode encodeJSR(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBR(instruction * instruct,
-			symbol * sym,
-			int count) {
+			const symbol * sym,
+			const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1161,8 +1161,8 @@ enum errorCode encodeBR(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRN(instruction * instruct,
-			 symbol * sym,
-			 int count) {
+			 const symbol * sym,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1201,8 +1201,8 @@ enum errorCode encodeBRN(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRZ(instruction * instruct,
-			 symbol * sym,
-			 int count) {
+			 const symbol * sym,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1241,8 +1241,8 @@ enum errorCode encodeBRZ(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRP(instruction * instruct,
-			 symbol * sym,
-			 int count) {
+			 const symbol * sym,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1281,8 +1281,8 @@ enum errorCode encodeBRP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRNZ(instruction * instruct,
-			  symbol * sym,
-			  int count) {
+			  const symbol * sym,
+			  const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1321,8 +1321,8 @@ enum errorCode encodeBRNZ(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRNP(instruction * instruct,
-			  symbol * sym,
-			  int count) {
+			  const symbol * sym,
+			  const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1361,8 +1361,8 @@ enum errorCode encodeBRNP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRZP(instruction * instruct,
-			  symbol * sym,
-			  int count) {
+			  const symbol * sym,
+			  const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1401,8 +1401,8 @@ enum errorCode encodeBRZP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeBRNZP(instruction * instruct,
-			   symbol * sym,
-			   int count) {
+			   const symbol * sym,
+			   const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1441,8 +1441,8 @@ enum errorCode encodeBRNZP(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeJSRR(instruction * instruct,
-			  symbol * symbol,
-			  int count) {
+			  const symbol * symbol,
+			  const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1472,8 +1472,8 @@ enum errorCode encodeJSRR(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeLDB(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1515,8 +1515,8 @@ enum errorCode encodeLDB(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeLDW(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1558,8 +1558,8 @@ enum errorCode encodeLDW(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeLEA(instruction * instruct,
-			 symbol * sym,
-			 int count) {
+			 const symbol * sym,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1601,8 +1601,8 @@ enum errorCode encodeLEA(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeNOT(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1635,8 +1635,8 @@ enum errorCode encodeNOT(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeRTI(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1662,8 +1662,8 @@ enum errorCode encodeRTI(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeLSHF(instruction * instruct,
-			  symbol * symbol,
-			  int count) {
+			  const symbol * symbol,
+			  const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1708,8 +1708,8 @@ enum errorCode encodeLSHF(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeRSHFL(instruction * instruct,
-			   symbol * symbol,
-			   int count) {
+			   const symbol * symbol,
+			   const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1754,8 +1754,8 @@ enum errorCode encodeRSHFL(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeRSHFA(instruction * instruct,
-			   symbol * symbol,
-			   int count) {
+			   const symbol * symbol,
+			   const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1800,8 +1800,8 @@ enum errorCode encodeRSHFA(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeSTB(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -1844,8 +1844,8 @@ enum errorCode encodeSTB(instruction * instruct,
  * @return errorCode
  */
 enum errorCode encodeSTW(instruction * instruct,
-			 symbol * symbol,
-			 int count) {
+			 const symbol * symbol,
+			 const int count) {
   
     if (( * instruct).addr < 0 || ( * instruct).addr >= 65536)
         return OTHER_ERROR;
@@ -2246,7 +2246,7 @@ bool isValidBase10(char * str) {
  * @param str
  * @return pFSM
  */
-enum pFSM checkLabel(char * str) {
+enum pFSM checkLabel(const char * str) {
     bool flag = true;
 
     if (strlen(str) > 0) {
@@ -2273,7 +2273,7 @@ enum pFSM checkLabel(char * str) {
  * @param str   string containing directive
  * @return pFSM lexeme (ORIG, FILL, END) or INVALID
  */
-enum pFSM checkDirective(char * str) {
+enum pFSM checkDirective(const char * str) {
   enum pFSM op = INVALID;
   if (strlen(str) > 0) 
 
@@ -2296,7 +2296,7 @@ enum pFSM checkDirective(char * str) {
  * @param str   string containing opcode
  * @return pFSM lexeme (instruction) or INVALID
  */
-enum pFSM checkInst(char * str) {
+enum pFSM checkInst(const char * str) {
   enum pFSM op = INVALID;
   if (strlen(str) > 0)
     
@@ -2319,7 +2319,7 @@ enum pFSM checkInst(char * str) {
  * @param str   string containing register name
  * @return pFSM lexeme (REG) or INVALID
  */
-enum pFSM checkRegister(char * str) {
+enum pFSM checkRegister(const char * str) {
   enum pFSM op = INVALID;
 
   /* A register name must contain exactly two characters
@@ -2523,7 +2523,7 @@ enum errorCode integrityCheck(char ** * tokens,
  */
 int matchLexemes(const enum pFSM * lArray1,
 		 const enum pFSM * lArray2,
-		 int count){
+		 const int count){
   /* Index of mismatch , should be count if no mismatch and lexeme arrays are equal */
   int index = -1;
 
@@ -2656,9 +2656,9 @@ int firstInstanceofOperands(enum pFSM * states,
  * @param label Label whose address is to be found
  * @return int  The address of the label (-1 if not found)
  */
-int getAddrofLabel(symbol * sym,
-		   int count,
-		   char * label) {
+int getAddrofLabel(const symbol * sym,
+		   const int count,
+		   const char * label) {
   /* Use -1 as default placeholder to indicate missing label in symbol table */
   int addr = -1;
 
@@ -2682,8 +2682,8 @@ int getAddrofLabel(symbol * sym,
  * @param numBits Specified number of bits
  * @return bool    
  */
-bool checkValidRange(int dec,
-		     int numBits) {
+bool checkValidRange(const int dec,
+		     const int numBits) {
   /* A signed 5-bit Base10 number can only exist in the closed interval [-2^4, 2^4 - 1] */
   return ((dec <= (pow(2, numBits - 1) - 1)) && (dec >= -pow(2, numBits - 1)));
 }
