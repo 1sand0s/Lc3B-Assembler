@@ -8,6 +8,41 @@
 #ifndef LC3B_ASSEMBLER_H_
 #define LC3B_ASSEMBLER_H_
 
+#define DIRECTIVE_TABLE_\
+  D_ENTRY(ORIG ,encodeORIG )\
+  D_ENTRY(FILL ,encodeFILL )\
+  D_ENTRY(END  ,encodeEND  )\
+
+#define INSTRUCTION_TABLE_\
+  I_ENTRY(ADD  ,encodeADD  )\
+  I_ENTRY(AND  ,encodeAND  )\
+  I_ENTRY(JMP  ,encodeJMP  )\
+  I_ENTRY(JSR  ,encodeJSR  )\
+  I_ENTRY(JSRR ,encodeJSRR )\
+  I_ENTRY(LDB  ,encodeLDB  )\
+  I_ENTRY(LDW  ,encodeLDW  )\
+  I_ENTRY(LEA  ,encodeLEA  )\
+  I_ENTRY(NOP  ,encodeNOP  )\
+  I_ENTRY(NOT  ,encodeNOT  )\
+  I_ENTRY(RET  ,encodeRET  )\
+  I_ENTRY(LSHF ,encodeLSHF )\
+  I_ENTRY(RSHFL,encodeRSHFL)\
+  I_ENTRY(RSHFA,encodeRSHFA)\
+  I_ENTRY(RTI  ,encodeRTI  )\
+  I_ENTRY(STB  ,encodeSTB  )\
+  I_ENTRY(STW  ,encodeSTW  )\
+  I_ENTRY(TRAP ,encodeTRAP )\
+  I_ENTRY(XOR  ,encodeXOR  )\
+  I_ENTRY(HALT ,encodeHALT )\
+  I_ENTRY(BR   ,encodeBR   )\
+  I_ENTRY(BRN  ,encodeBRN  )\
+  I_ENTRY(BRZ  ,encodeBRZ  )\
+  I_ENTRY(BRP  ,encodeBRP  )\
+  I_ENTRY(BRNZ ,encodeBRNZ )\
+  I_ENTRY(BRNP ,encodeBRNP )\
+  I_ENTRY(BRZP ,encodeBRZP )\
+  I_ENTRY(BRNZP,encodeBRNZP)\
+
 /** +
  * @enum FSM
  * @brief Enum to define assembly process states
@@ -27,37 +62,13 @@ enum FSM {
  */
 enum pFSM {
     LABEL,  /**< LABEL */
-    ORIG,   /**< ORIG */
-    FILL,   /**< FILL */
-    END,    /**< END */
-    ADD,    /**< ADD */
-    AND,    /**< AND */
-    BR,     /**< BR */
-    BRN,    /**< BRN */
-    BRZ,    /**< BRZ */
-    BRP,    /**< BRP */
-    BRNZ,   /**< BRNZ */
-    BRNP,   /**< BRNP */
-    BRZP,   /**< BRZP */
-    BRNZP,  /**< BRNZP */
-    JMP,    /**< JMP */
-    JSR,    /**< JSR */
-    JSRR,   /**< JSRR */
-    LDB,    /**< LDB */
-    LDW,    /**< LDW */
-    LEA,    /**< LEA */
-    NOP,    /**< NOP */
-    NOT,    /**< NOT */
-    RET,    /**< RET */
-    LSHF,   /**< LSHF */
-    RSHFL,  /**< RSHFL */
-    RSHFA,  /**< RSHFA */
-    RTI,    /**< RTI */
-    STB,    /**< STB */
-    STW,    /**< STW */
-    TRAP,   /**< TRAP */
-    XOR,    /**< XOR */
-    HALT,   /**< HALT */
+#define D_ENTRY(a, b) a,
+    DIRECTIVE_TABLE_
+#undef D_ENTRY
+
+#define I_ENTRY(a, b) a,
+    INSTRUCTION_TABLE_
+#undef I_ENTRY
     INVALID,/**< INVALID */
     REG,    /**< REG */
     IMM,    /**< IMM */
@@ -191,37 +202,13 @@ void toUpperCase(char * );
 
 
 /***************************************Encoder Methods*********************************/
-enum errorCode encodeADD(instruction * , symbol * , int);
-enum errorCode encodeAND(instruction * , symbol * , int);
-enum errorCode encodeXOR(instruction * , symbol * , int);
-enum errorCode encodeORIG(instruction * , symbol * , int);
-enum errorCode encodeJMP(instruction * , symbol * , int);
-enum errorCode encodeRET(instruction * , symbol * , int);
-enum errorCode encodeJSRR(instruction * , symbol * , int);
-enum errorCode encodeJSR(instruction * , symbol * , int);
-enum errorCode encodeBR(instruction * , symbol * , int);
-enum errorCode encodeBRN(instruction * , symbol * , int);
-enum errorCode encodeBRZ(instruction * , symbol * , int);
-enum errorCode encodeBRP(instruction * , symbol * , int);
-enum errorCode encodeBRNZ(instruction * , symbol * , int);
-enum errorCode encodeBRNP(instruction * , symbol * , int);
-enum errorCode encodeBRZP(instruction * , symbol * , int);
-enum errorCode encodeBRNZP(instruction * , symbol * , int);
-enum errorCode encodeLDB(instruction * , symbol * , int);
-enum errorCode encodeLDW(instruction * , symbol * , int);
-enum errorCode encodeLEA(instruction * , symbol * , int);
-enum errorCode encodeSTB(instruction * , symbol * , int);
-enum errorCode encodeSTW(instruction * , symbol * , int);
-enum errorCode encodeLSHF(instruction * , symbol * , int);
-enum errorCode encodeRSHFL(instruction * , symbol * , int);
-enum errorCode encodeRSHFA(instruction * , symbol * , int);
-enum errorCode encodeRTI(instruction * , symbol * , int);
-enum errorCode encodeFILL(instruction * , symbol * , int);
-enum errorCode encodeEND(instruction * , symbol * , int);
-enum errorCode encodeNOP(instruction * , symbol * , int);
-enum errorCode encodeTRAP(instruction * , symbol * , int);
-enum errorCode encodeHALT(instruction * , symbol * , int);
-enum errorCode encodeNOT(instruction * , symbol * , int);
+#define D_ENTRY(a, b) enum errorCode b(instruction * , symbol * , int);
+    DIRECTIVE_TABLE_
+#undef D_ENTRY
+
+#define I_ENTRY(a, b) enum errorCode b(instruction * , symbol * , int);
+    INSTRUCTION_TABLE_
+#undef I_ENTRY
 /***************************************************************************************/
 
 #endif /* LC3B_ASSEMBLER_H_ */

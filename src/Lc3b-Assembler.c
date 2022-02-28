@@ -99,43 +99,25 @@ v *
  */
 #define ADDRESS_WIDTH_ 16
 
+/** +
+ * @def STRINGIFY_MACRO_
+ * @brief Stringifies a macro value (adds "")
+ *
+ */
+#define STRINGIFY_MACRO_(x) #x
+
 /* List of all names that are invalid to use a labels in Lc3B assembly file */
 const char * inval[43] = {
 			  "IN",
 			  "OUT",
 			  "GETC",
 			  "PUTS",
-			  ".ORIG",
-			  ".FILL",
-			  ".END",
-			  "ADD",
-			  "AND",
-			  "JMP",
-			  "JSR",
-			  "JSRR",
-			  "LDB",
-			  "LDW",
-			  "LEA",
-			  "NOP",
-			  "NOT",
-			  "RET",
-			  "LSHF",
-			  "RSHFL",
-			  "RSHFA",
-			  "RTI",
-			  "STB",
-			  "STW",
-			  "TRAP",
-			  "XOR",
-			  "HALT",
-			  "BR",
-			  "BRN",
-			  "BRZ",
-			  "BRP",
-			  "BRNZ",
-			  "BRNP",
-			  "BRZP",
-			  "BRNZP",
+#define D_ENTRY(a, b) STRINGIFY_MACRO_(.a),
+    DIRECTIVE_TABLE_
+#undef D_ENTRY
+#define I_ENTRY(a, b) STRINGIFY_MACRO_(a),
+    INSTRUCTION_TABLE_
+#undef I_ENTRY
 			  "R0",
 			  "R1",
 			  "R2",
@@ -148,16 +130,16 @@ const char * inval[43] = {
 
 /* Directives of Lc3B ISA as char* (used in converting char* tokens to pFSM lexemes) */
 const char * directives[NUMBER_OF_DIRECTIVES_]={
-						".ORIG",
-						".FILL",
-						".END"
+#define D_ENTRY(a, b) STRINGIFY_MACRO_(.a),
+    DIRECTIVE_TABLE_
+#undef D_ENTRY
 };
 
 /* Valid pFSM members for all directives of Lc3B ISA */
 const enum pFSM pDirectives[NUMBER_OF_DIRECTIVES_]={
-					       ORIG,
-					       FILL,
-					       END
+#define D_ENTRY(a, b) a,
+    DIRECTIVE_TABLE_
+#undef D_ENTRY
 };
 
 /* Valid Registers that can be used with Lc3B instructions */
@@ -174,66 +156,16 @@ const char * regs[NUMBER_OF_REGISTERS_]={
 
 /* Opcodes of Lc3B ISA as char* (used in converting char* tokens to pFSM lexemes) */
 const char * opcodes[NUMBER_OF_INSTRUCTIONS_]={
-					       "ADD",
-					       "AND",
-					       "JMP",
-					       "JSR",
-					       "JSRR",
-					       "LDB",
-					       "LDW",
-					       "LEA",
-					       "NOP",
-					       "NOT",
-					       "RET",
-					       "LSHF",
-					       "RSHFL",
-					       "RSHFA",
-					       "RTI",
-					       "STB",
-					       "STW",
-					       "TRAP",
-					       "XOR",
-					       "HALT",
-					       "BR",
-					       "BRN",
-					       "BRZ",
-					       "BRP",
-					       "BRNZ",
-					       "BRNP",
-					       "BRZP",
-					       "BRNZP"
+#define I_ENTRY(a, b) STRINGIFY_MACRO_(a),
+    INSTRUCTION_TABLE_
+#undef I_ENTRY
 };
 
 /* Valid pFSM members for all opcodes of Lc3B ISA */
 const enum pFSM pOpcodes[NUMBER_OF_INSTRUCTIONS_] = {
-						     ADD,
-						     AND,
-						     JMP,
-						     JSR,
-						     JSRR,
-						     LDB,
-						     LDW,
-						     LEA,
-						     NOP,
-						     NOT,
-						     RET,
-						     LSHF,
-						     RSHFL,
-						     RSHFA,
-						     RTI,
-						     STB,
-						     STW,
-						     TRAP,
-						     XOR,
-						     HALT,
-						     BR,
-						     BRN,
-						     BRZ,
-						     BRP,
-						     BRNZ,
-						     BRNP,
-						     BRZP,
-						     BRNZP
+#define I_ENTRY(a, b) a,
+    INSTRUCTION_TABLE_
+#undef I_ENTRY
 };
 
 
@@ -285,37 +217,13 @@ const enum pFSM pTransitions[MAX_VALID_COMBINATIONS_][MAX_INSTRUCTION_LENGTH_] =
  * @return errorCode     Any errors during encoding process
  */
 enum errorCode( * encoder[NUMBER_OF_DIRECTIVES_ + NUMBER_OF_INSTRUCTIONS_])(instruction * , symbol * , int) = {
-   encodeORIG,
-   encodeFILL,
-   encodeEND,
-   encodeADD,
-   encodeAND,
-   encodeJMP,
-   encodeJSR,
-   encodeJSRR,
-   encodeLDB,
-   encodeLDW,
-   encodeLEA,
-   encodeNOP,
-   encodeNOT,
-   encodeRET,
-   encodeLSHF,
-   encodeRSHFL,
-   encodeRSHFA,
-   encodeRTI,
-   encodeSTB,
-   encodeSTW,
-   encodeTRAP,
-   encodeXOR,
-   encodeHALT,
-   encodeBR,
-   encodeBRN,
-   encodeBRZ,
-   encodeBRP,
-   encodeBRNZ,
-   encodeBRNP,
-   encodeBRZP,
-   encodeBRNZP
+#define D_ENTRY(a, b) b,
+   DIRECTIVE_TABLE_
+#undef D_ENTRY
+
+#define I_ENTRY(a, b) b,
+   INSTRUCTION_TABLE_
+#undef I_ENTRY
 };
 
 /** +
