@@ -27,7 +27,7 @@
  * @brief Comment to stop printing the tokens during lexing
  *
  */
-//#define Debug_Print
+/*#define Debug_Print*/
 
 /** +
  * @def Debug_Print_InstructionTable
@@ -230,26 +230,31 @@ enum errorCode( * encoder[NUMBER_OF_DIRECTIVES_ + NUMBER_OF_INSTRUCTIONS_])(inst
  * @fn int main(int, char**)
  * @brief main method
  *
+ *              Two arguements from command line expected
+ *               1. argv[1] : Name of the file containing assembly code <*.asm>
+ *               2. argv[2] : Name of the file to write assembled hex code to <*.hex>
+ * 
  * @param argc  Number of commnadline arguements
  * @param argv  Name of commandline arguements
  * @return int  Exit code
  */
 int main(int argc, char ** argv) {
 
-  enum errorCode errorp; //Holds the type error encountered during assembly
+  enum errorCode errorp;
   
-  /* Two arguements from command line expected
-   * 1. argv[1] : Name of the file containing assembly code <*.asm>
-   * 2. argv[2] : Name of the file to write assembled hex code to <*.hex> */
   if (argc == 3) {
-    FILE * infile = fopen(argv[1], "r"); //Open *.asm for read-only
-    FILE * outfile = fopen(argv[2], "w"); //Open *.hex for write-mode
+    
+    /* Open *.asm for read-only */
+    FILE * infile = fopen(argv[1], "r");
+
+    /* Open *.hex for write-mode */
+    FILE * outfile = fopen(argv[2], "w");
     
     if (!infile) {
-      exit(OTHER_ERROR); //Unable to open *.asm file
+      exit(OTHER_ERROR);
     }
     else if (!outfile) {
-      exit(OTHER_ERROR); //Unable to open *.hex file
+      exit(OTHER_ERROR);
     }
     else {
       /* Begin assembly if expected number of arguments is correct */
@@ -259,7 +264,9 @@ int main(int argc, char ** argv) {
     }
   }
   else {
-    exit(OTHER_ERROR); //Missing commandline arguements
+    
+    /* Missing commandline arguements */
+    exit(OTHER_ERROR);
   }
   exit(errorp);
 }
@@ -284,7 +291,7 @@ enum errorCode assemble(FILE * in, FILE * out ) {
   
   /* If no errors then proceed with printing/writing to file */
   if (errorp == OK_VALID) {
-#ifdef Debug_Print_SymbolTable //Comment out MACRO definition to stop printing symbol table
+#ifdef Debug_Print_SymbolTable
     
     printf("\n\n\n");
     char * header = "/*******************Symbol Table*************************/";
@@ -294,16 +301,18 @@ enum errorCode assemble(FILE * in, FILE * out ) {
     printf("\n");
     for (int j = 0; j < tableCount; j++) {
       printWithIndent("*", INDENT_SYMBOL_);
-      char * addr = Base10Number2Base16String(symbolTable[j].addr); //Convert base10 address to hex string
+
+      /* Convert base10 address to hex string */
+      char * addr = Base10Number2Base16String(symbolTable[j].addr);
       printf("\t%-10s\t|\t%d(0x%s)\t\t*", symbolTable[j].symbolName, symbolTable[j].addr, addr);
       printf("\n");
-      free(addr); // Free hex string
+      free(addr);
     }
     printWithIndent(ender, INDENT_SYMBOL_);
     printf("\n");
 #endif
     
-#ifdef Debug_Print_InstructionTable //Comment out MACRO definition to stop printing instruction table
+#ifdef Debug_Print_InstructionTable
     printf("\n\n\n");
     char * header1 = "/****************************************************Instruction Table*****************************************************************/";
     char * ender1 = "/**************************************************************************************************************************************/";
@@ -327,7 +336,7 @@ enum errorCode assemble(FILE * in, FILE * out ) {
       for (; i < 3; i++)
 	printf("\t");
       printf("%10s\n", "*");
-      free(hex); // Free hex string
+      free(hex);
     }
     printWithIndent(ender1, INDENT_INSTRUCTION_);
     printf("\n");
@@ -371,8 +380,8 @@ enum errorCode assemble(FILE * in, FILE * out ) {
 	break;
     }
   }
-  freeSymbolTable( & symbolTable, & tableCount); //Free the symbol table
-  freeInstructionTable( & instructionTable, & tableCount2); //Free the instruction table
+  freeSymbolTable( & symbolTable, & tableCount);
+  freeInstructionTable( & instructionTable, & tableCount2);
   
   /* return the errorcode
    * Should be OK_VALID if no errors */

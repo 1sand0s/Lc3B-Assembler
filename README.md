@@ -1,6 +1,7 @@
 # Lc3B-Assembler
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/1sand0s/Lc3B-Assembler/Makefile%20CI)
 ![GitHub](https://img.shields.io/github/license/1sand0s/Lc3B-Assembler)
+![GitHub](https://img.shields.io/badge/Compliance-MISRA--C:2004-green.svg)
 
 <h2> What is it ?</h2>
 
