@@ -3,8 +3,6 @@
 ![GitHub](https://img.shields.io/github/license/1sand0s/Lc3B-Assembler)
 ![GitHub](https://img.shields.io/badge/Compliance-MISRA--C:2004-green.svg)
 
-<h2> What is it ?</h2>
-
 A standalone assembler for the [Lc3B ISA](https://courses.engr.illinois.edu/ece411/fa2019/mp/LC3b_ISA.pdf) written from scratch in C without any 
 external libraries besides std Clibs. 
 <br>The computer can only process 1's and 0's or machine code and therefore any program instructing 
@@ -14,7 +12,13 @@ Assembly language is one such higher(relative to machine code) level of abstract
 programs written in these higher level languages must be transformed into machine code. An assembler is a tool that transforms programs written in 
 the assembly language to machine code. 
 
-<h2>Setup</h2>
+<h2> Requirements </h2>
+
+1. [GCC C Compiler](https://gcc.gnu.org/)
+2. [GNU Make](https://www.gnu.org/software/make/)
+3. [Check](https://libcheck.github.io/check/)
+
+<h2> Building </h2>
 
 1. <h4>Clone the Lc3B-Assembler repository:</h4>
 
@@ -34,6 +38,6 @@ the assembly language to machine code.
     The `configure` script might complain about [check](https://libcheck.github.io/check/) package not being present. `check` is the test runner used for 
     unit-testing. You can install `check` as follows `sudo apt-get install check` or build it from source by following these [instructions](https://github.com/libcheck/check)
 
-3. <h4>Running:</h4>
+<h2> Usage </h2>
 
-    To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute:<br> `./Lc3BAssembler <*.asm> <*.hex>`
+To use the assembler, `cd` to the directory `Lc3B-Assembler/src` and execute:<br> `./Lc3BAssembler <*.asm> <*.hex>`
