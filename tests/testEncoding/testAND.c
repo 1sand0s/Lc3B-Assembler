@@ -40,7 +40,6 @@ START_TEST (testEncoding_AND_CORRECT_)
 
     /* Assert exit code as OK_VALID */
     ck_assert(error == OK_VALID);
-    printf("%s",and.encoding);
     ck_assert_str_eq(and.encoding, "0101011011100001");
 }
 END_TEST
