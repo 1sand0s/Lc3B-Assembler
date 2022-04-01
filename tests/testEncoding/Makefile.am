@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR
-check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR
+TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND
+check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND
 
 # Run tests for encoding ORIG 
 testORIG_SOURCES = testORIG.c $(top_builddir)/src/Lc3b-Assembler.h
@@ -42,3 +42,8 @@ testADD_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
 testXOR_SOURCES = testXOR.c $(top_builddir)/src/Lc3b-Assembler.h
 testXOR_CFLAGS = @CHECK_CFLAGS@
 testXOR_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding AND
+testAND_SOURCES = testAND.c $(top_builddir)/src/Lc3b-Assembler.h
+testAND_CFLAGS = @CHECK_CFLAGS@
+testAND_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@

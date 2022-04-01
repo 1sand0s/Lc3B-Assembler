@@ -17,55 +17,56 @@
 
 /** +
  * @fn  START_TEST()
- * @brief Test case for XOR instruction
+ * @brief Test case for AND instruction
  *
- * @param testEncoding_XOR_CORRECT__
+ * @param testEncoding_AND_CORRECT__
  */
-START_TEST (testEncoding_XOR_CORRECT_)
+START_TEST (testEncoding_AND_CORRECT_)
 {
-    instruction xor;
+    instruction and;
     enum errorCode error;
     char* operands[]={"R3", "R3", "#1"};
 
     /* Intialize struct instruct */
-    xor.label = NULL;
-    xor.directive = NULL;
-    xor.opcode = "XOR";
-    xor.operands = operands;
-    xor.addr = 12288;//0x3000
-    xor.opCount = 1;
+    and.label = NULL;
+    and.directive = NULL;
+    and.opcode = "AND";
+    and.operands = operands;
+    and.addr = 12288;//0x3000
+    and.opCount = 1;
 
-    /* Encode xor instruct */
-    error = encodeXOR(&xor, NULL, 0);
+    /* Encode and instruct */
+    error = encodeAND(&and, NULL, 0);
 
     /* Assert exit code as OK_VALID */
     ck_assert(error == OK_VALID);
-    ck_assert_str_eq(xor.encoding, "1001011011100001");
+    printf("%s",and.encoding);
+    ck_assert_str_eq(and.encoding, "0101011011100001");
 }
 END_TEST
 
 /** +
  * @fn  START_TEST()
- * @brief Test case for XOR instruction
+ * @brief Test case for AND instruction
  *
- * @param testEncoding_XOR_INCORRECT_LESS_THAN_0_
+ * @param testEncoding_AND_INCORRECT_LESS_THAN_0_
  */
-START_TEST (testEncoding_XOR_INCORRECT_LESS_THAN_0_)
+START_TEST (testEncoding_AND_INCORRECT_LESS_THAN_0_)
 {
-    instruction xor;
+    instruction and;
     enum errorCode error;
     char* operands[]={"R3", "R3", "#1"};
 
     /* Initialize struct instruct */
-    xor.label = NULL;
-    xor.directive = NULL;
-    xor.opcode = "XOR";
-    xor.operands = operands;
-    xor.addr = -1;//Negative address
-    xor.opCount = 1;
+    and.label = NULL;
+    and.directive = NULL;
+    and.opcode = "AND";
+    and.operands = operands;
+    and.addr = -1;//Negative address
+    and.opCount = 1;
 
-    /* Encode xor instruct */
-    error = encodeXOR(&xor, NULL, 0);
+    /* Encode and instruct */
+    error = encodeAND(&and, NULL, 0);
 
     /* Assert exit code as OTHER_ERROR
      * Exit code not 0 since address is invalid (<0)
@@ -76,26 +77,26 @@ END_TEST
 
 /** +
  * @fn  START_TEST()
- * @brief Test case for XOR instruction
+ * @brief Test case for AND instruction
  *
- * @param testEncoding_XOR_INCORRECT_GREATER_THAN_65535_
+ * @param testEncoding_AND_INCORRECT_GREATER_THAN_65535_
  */
-START_TEST (testEncoding_XOR_INCORRECT_GREATER_THAN_65535_)
+START_TEST (testEncoding_AND_INCORRECT_GREATER_THAN_65535_)
 {
-    instruction xor;
+    instruction and;
     enum errorCode error;
     char* operands[]={"R3", "R3", "#1"};
 
     /* Initialize struct instruct */
-    xor.label = NULL;
-    xor.directive = NULL;
-    xor.opcode = "XOR";
-    xor.operands = operands;
-    xor.addr = 65536;//Address greater than 65535
-    xor.opCount = 1;
+    and.label = NULL;
+    and.directive = NULL;
+    and.opcode = "AND";
+    and.operands = operands;
+    and.addr = 65536;//Address greater than 65535
+    and.opCount = 1;
 
-    /* Encode xor instruct */
-    error = encodeXOR(&xor, NULL, 0);
+    /* Encode and instruct */
+    error = encodeAND(&and, NULL, 0);
 
     /* Assert exit code as OTHER_ERROR
      * Exit code not 0 since address is invalid (>65535)
@@ -114,12 +115,12 @@ END_TEST
 int main(void)
 {
     /* Create test suite for testing the assembler */
-    Suite *s1 = suite_create("Test XOR");
+    Suite *s1 = suite_create("Test AND");
 
     /* Create test cases to add to test suite */
-    TCase *tc1_0 = tcase_create("XOR CORRECT");
-    TCase *tc1_1 = tcase_create("XOR INCORRECT ADDRESS LESS THAN 0");
-    TCase *tc1_2 = tcase_create("XOR INCORRECT ADDRESS GREATER THAN 65535");
+    TCase *tc1_0 = tcase_create("AND CORRECT");
+    TCase *tc1_1 = tcase_create("AND INCORRECT ADDRESS LESS THAN 0");
+    TCase *tc1_2 = tcase_create("AND INCORRECT ADDRESS GREATER THAN 65535");
     
     /* Create test runner to run the test */
     SRunner *sr = srunner_create(s1);
@@ -133,9 +134,9 @@ int main(void)
     suite_add_tcase(s1, tc1_2);
     
     /* Add test methods to test cases */
-    tcase_add_test(tc1_0, testEncoding_XOR_CORRECT_);
-    tcase_add_test(tc1_1, testEncoding_XOR_INCORRECT_LESS_THAN_0_);
-    tcase_add_test(tc1_2, testEncoding_XOR_INCORRECT_GREATER_THAN_65535_);
+    tcase_add_test(tc1_0, testEncoding_AND_CORRECT_);
+    tcase_add_test(tc1_1, testEncoding_AND_INCORRECT_LESS_THAN_0_);
+    tcase_add_test(tc1_2, testEncoding_AND_INCORRECT_GREATER_THAN_65535_);
 
     /* Run all test cases in test suite*/
     srunner_run_all(sr, CK_ENV);
