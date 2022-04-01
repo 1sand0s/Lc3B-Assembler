@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR
-check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR
+TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN
+check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN
 
 # Run tests for encoding ORIG 
 testORIG_SOURCES = testORIG.c $(top_builddir)/src/Lc3b-Assembler.h
@@ -67,3 +67,13 @@ testJSR_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
 testBR_SOURCES = testBR.c $(top_builddir)/src/Lc3b-Assembler.h
 testBR_CFLAGS = @CHECK_CFLAGS@
 testBR_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding BRN
+testBRN_SOURCES = testBRN.c $(top_builddir)/src/Lc3b-Assembler.h
+testBRN_CFLAGS = @CHECK_CFLAGS@
+testBRN_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding BRP
+testBRP_SOURCES = testBRP.c $(top_builddir)/src/Lc3b-Assembler.h
+testBRP_CFLAGS = @CHECK_CFLAGS@
+testBRP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
