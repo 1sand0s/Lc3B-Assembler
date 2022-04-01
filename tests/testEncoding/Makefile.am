@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN
-check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN
+TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN testBRNZ testBRNP testBRZP
+check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN testBRNZ testBRNP testBRZP
 
 # Run tests for encoding ORIG 
 testORIG_SOURCES = testORIG.c $(top_builddir)/src/Lc3b-Assembler.h
@@ -77,3 +77,18 @@ testBRN_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
 testBRP_SOURCES = testBRP.c $(top_builddir)/src/Lc3b-Assembler.h
 testBRP_CFLAGS = @CHECK_CFLAGS@
 testBRP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding BRNZ
+testBRNZ_SOURCES = testBRNZ.c $(top_builddir)/src/Lc3b-Assembler.h
+testBRNZ_CFLAGS = @CHECK_CFLAGS@
+testBRNZ_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding BRNP
+testBRNP_SOURCES = testBRNP.c $(top_builddir)/src/Lc3b-Assembler.h
+testBRNP_CFLAGS = @CHECK_CFLAGS@
+testBRNP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding BRZP
+testBRZP_SOURCES = testBRZP.c $(top_builddir)/src/Lc3b-Assembler.h
+testBRZP_CFLAGS = @CHECK_CFLAGS@
+testBRZP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
