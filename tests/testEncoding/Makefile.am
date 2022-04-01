@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN testBRNZ testBRNP testBRZP
-check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN testBRNZ testBRNP testBRZP
+TESTS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN testBRNZ testBRNP testBRZP testBRNZP
+check_PROGRAMS = testORIG testFILL testEND testNOP testTRAP testHALT testADD testXOR testAND testJMP testRET testJSR testBR testBRP testBRN testBRNZ testBRNP testBRZP testBRNZP
 
 # Run tests for encoding ORIG 
 testORIG_SOURCES = testORIG.c $(top_builddir)/src/Lc3b-Assembler.h
@@ -92,3 +92,8 @@ testBRNP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
 testBRZP_SOURCES = testBRZP.c $(top_builddir)/src/Lc3b-Assembler.h
 testBRZP_CFLAGS = @CHECK_CFLAGS@
 testBRZP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
+
+# Run tests for encoding BRNZP
+testBRNZP_SOURCES = testBRNZP.c $(top_builddir)/src/Lc3b-Assembler.h
+testBRNZP_CFLAGS = @CHECK_CFLAGS@
+testBRNZP_LDADD = $(top_builddir)/src/libAssembler.la @CHECK_LIBS@
